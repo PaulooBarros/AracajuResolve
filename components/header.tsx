@@ -202,6 +202,42 @@ export function Header() {
                 </Link>
               )
             })}
+            {isAuthenticated && (
+              <>
+                <div className="border-t border-border/50 my-2" />
+                <Link href="/minhas-denuncias" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start gap-2">
+                    <FileText className="h-4 w-4" />
+                    Minhas Denuncias
+                  </Button>
+                </Link>
+                <Link href="/perfil" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start gap-2">
+                    <User className="h-4 w-4" />
+                    Meu Perfil
+                  </Button>
+                </Link>
+                {isAdmin && (
+                  <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start gap-2 text-primary">
+                      <Shield className="h-4 w-4" />
+                      Painel Admin
+                    </Button>
+                  </Link>
+                )}
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-2 text-destructive"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    void logout()
+                  }}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sair
+                </Button>
+              </>
+            )}
             {!isAuthenticated && (
               <>
                 <div className="border-t border-border/50 my-2" />

@@ -26,6 +26,10 @@ interface RegisterResult {
   error?: string
 }
 
+interface UpdateProfileInput {
+  name: string
+}
+
 interface AuthContextType {
   user: User | null
   session: Session | null
@@ -34,6 +38,7 @@ interface AuthContextType {
   login: (email: string, password: string, role?: UserRole) => Promise<boolean>
   register: (input: RegisterInput) => Promise<RegisterResult>
   logout: () => Promise<void>
+  updateProfile: (input: UpdateProfileInput) => Promise<boolean>
   isLoading: boolean
   authError: string | null
   refreshUser: () => Promise<void>
@@ -235,6 +240,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null)
   }, [])
 
+  const updateProfile = useCallback(async ({ name }: UpdateProfileInput) => {
+    if (!isSupabaseConfigured()) {
+      setAuthError('Supabase nao configurado.')
+      return false
+    }
+
+    if (!session || !user) {
+      setAuthError('Usuario nao autenticado.')
+      return false
+    }
+
+    const supabase = getSupabaseBrowserClient()
+    setAuthError(null)
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        full_name: name.trim(),
+      })
+      .eq('id', user.id)
+
+    if (error) {
+      setAuthError(error.message)
+      return false
+    }
+
+    await refreshUser()
+    return true
+  }, [refreshUser, session, user])
+
   const value = useMemo(
     () => ({
       user,
@@ -244,11 +279,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       register,
       logout,
+      updateProfile,
       isLoading,
       authError,
       refreshUser,
     }),
-    [authError, isLoading, login, logout, refreshUser, register, session, user]
+    [authError, isLoading, login, logout, refreshUser, register, session, updateProfile, user]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

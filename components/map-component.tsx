@@ -33,6 +33,7 @@ export default function MapComponent({
   const mapRef = useRef<L.Map | null>(null)
   const markersRef = useRef<L.LayerGroup | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const markerInstancesRef = useRef<Map<string, L.Marker>>(new Map())
 
   useEffect(() => {
     if (!mapRef.current && containerRef.current) {
@@ -60,11 +61,19 @@ export default function MapComponent({
       })
     }
 
+    const handleResize = () => {
+      mapRef.current?.invalidateSize()
+    }
+
+    window.addEventListener('resize', handleResize)
+
     return () => {
+      window.removeEventListener('resize', handleResize)
       if (mapRef.current) {
         mapRef.current.remove()
         mapRef.current = null
       }
+      markerInstancesRef.current.clear()
     }
   }, [initialZoom, interactive])
 
@@ -72,8 +81,14 @@ export default function MapComponent({
     if (!mapRef.current || !markersRef.current) return
 
     markersRef.current.clearLayers()
+    markerInstancesRef.current.clear()
 
-    complaints.forEach((complaint) => {
+    const validComplaints = complaints.filter((complaint) => (
+      Number.isFinite(complaint.latitude) &&
+      Number.isFinite(complaint.longitude)
+    ))
+
+    validComplaints.forEach((complaint) => {
       const color = statusColors[complaint.status]
 
       const icon = L.divIcon({
@@ -117,17 +132,44 @@ export default function MapComponent({
           </div>
         </div>
       `)
+
+      markerInstancesRef.current.set(complaint.id, marker)
     })
 
     if (selectedComplaintId) {
-      const selected = complaints.find((complaint) => complaint.id === selectedComplaintId)
+      const selected = validComplaints.find((complaint) => complaint.id === selectedComplaintId)
       if (selected) {
         mapRef.current.setView([selected.latitude, selected.longitude], 15, {
           animate: true,
         })
+
+        markerInstancesRef.current.get(selected.id)?.openPopup()
       }
+      return
     }
-  }, [complaints, selectedComplaintId, onSelectComplaint])
+
+    if (validComplaints.length === 1) {
+      const [complaint] = validComplaints
+      mapRef.current.setView([complaint.latitude, complaint.longitude], Math.max(initialZoom, 15), {
+        animate: false,
+      })
+    }
+
+    if (validComplaints.length > 1) {
+      const bounds = L.latLngBounds(
+        validComplaints.map((complaint) => [complaint.latitude, complaint.longitude] as L.LatLngTuple)
+      )
+
+      mapRef.current.fitBounds(bounds, {
+        padding: [40, 40],
+        maxZoom: 15,
+      })
+    }
+
+    requestAnimationFrame(() => {
+      mapRef.current?.invalidateSize()
+    })
+  }, [complaints, initialZoom, selectedComplaintId, onSelectComplaint])
 
   return (
     <div

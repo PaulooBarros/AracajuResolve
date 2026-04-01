@@ -43,26 +43,33 @@ async function fetchComplaintsFromSupabase() {
   }
 
   const supabase = getSupabaseBrowserClient()
-  const { data, error } = await supabase
-    .from('complaints')
-    .select(`
-      id,
-      title,
-      description,
-      category,
-      neighborhood,
-      street,
-      reference_point,
-      status,
-      priority,
-      responsible_organ,
-      image_url,
-      latitude,
-      longitude,
-      user_id,
-      confirmations_count,
-      created_at,
-      updated_at,
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  const complaintFields = `
+    id,
+    title,
+    description,
+    category,
+    neighborhood,
+    street,
+    reference_point,
+    status,
+    priority,
+    responsible_organ,
+    image_url,
+    latitude,
+    longitude,
+    user_id,
+    confirmations_count,
+    created_at,
+    updated_at
+  `
+
+  const selectFields = session
+    ? `
+      ${complaintFields},
       profiles (
         id,
         email,
@@ -71,14 +78,19 @@ async function fetchComplaintsFromSupabase() {
         avatar_url,
         created_at
       )
-    `)
+    `
+    : complaintFields
+
+  const { data, error } = await supabase
+    .from('complaints')
+    .select(selectFields)
     .order('created_at', { ascending: false })
 
   if (error) {
     throw error
   }
 
-  return (data as ComplaintRecord[]).map(mapComplaintRecord)
+  return ((data || []) as ComplaintRecord[]).map(mapComplaintRecord)
 }
 
 export function useComplaints() {

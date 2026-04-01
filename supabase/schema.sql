@@ -165,11 +165,12 @@ with check (
   )
 );
 
+drop policy if exists "complaints_select_public" on public.complaints;
 drop policy if exists "complaints_select_authenticated" on public.complaints;
-create policy "complaints_select_authenticated"
+create policy "complaints_select_public"
 on public.complaints
 for select
-to authenticated
+to public
 using (true);
 
 drop policy if exists "complaints_insert_authenticated" on public.complaints;

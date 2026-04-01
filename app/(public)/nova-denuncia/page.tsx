@@ -4,14 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import { 
-  MapPin, 
-  Upload, 
-  X, 
-  Loader2, 
+import {
+  Upload,
+  X,
+  Loader2,
   CheckCircle2,
   AlertCircle,
-  Camera
+  Camera,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,8 +33,9 @@ import {
 } from '@/components/ui/dialog'
 import { useAuth } from '@/lib/auth-context'
 import { useComplaints } from '@/lib/complaints-store'
-import { CATEGORY_LABELS, NEIGHBORHOODS, RESPONSIBLE_ORGANS } from '@/lib/types'
+import { CATEGORY_LABELS, NEIGHBORHOODS, RESPONSIBLE_ORGANS, type ComplaintCategory } from '@/lib/types'
 import Link from 'next/link'
+import type { ResolvedLocationDetails } from '@/components/location-picker'
 
 const LocationPicker = dynamic(() => import('@/components/location-picker'), {
   ssr: false,
@@ -50,11 +50,13 @@ export default function NewComplaintPage() {
   const router = useRouter()
   const { isAuthenticated, isLoading: authLoading, user } = useAuth()
   const { addComplaint } = useComplaints()
-  
+
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [neighborhood, setNeighborhood] = useState('')
+  const [street, setStreet] = useState('')
+  const [referencePoint, setReferencePoint] = useState('')
   const [responsibleOrgan, setResponsibleOrgan] = useState('')
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -63,7 +65,6 @@ export default function NewComplaintPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [showMapModal, setShowMapModal] = useState(false)
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -82,14 +83,26 @@ export default function NewComplaintPage() {
     setImagePreview(null)
   }
 
-  const handleLocationSelect = (lat: number, lng: number) => {
+  const handleLocationSelect = (lat: number, lng: number, details?: ResolvedLocationDetails) => {
     setLatitude(lat)
     setLongitude(lng)
+
+    if (details?.neighborhood) {
+      setNeighborhood(details.neighborhood)
+    }
+
+    if (details?.street) {
+      setStreet(details.street)
+    }
+
+    if (details?.referencePoint) {
+      setReferencePoint(details.referencePoint)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!isAuthenticated) {
       setShowLoginModal(true)
       return
@@ -102,15 +115,15 @@ export default function NewComplaintPage() {
 
     setIsSubmitting(true)
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Add complaint to localStorage
     addComplaint({
       title,
       description,
-      category: category as any,
+      category: category as ComplaintCategory,
       neighborhood,
+      street,
+      referencePoint,
       responsibleOrgan: responsibleOrgan || 'A definir',
       imageUrl: imagePreview || undefined,
       latitude,
@@ -122,7 +135,6 @@ export default function NewComplaintPage() {
     setIsSubmitting(false)
     setShowSuccess(true)
 
-    // Redirect after success
     setTimeout(() => {
       router.push('/minhas-denuncias')
     }, 2000)
@@ -145,9 +157,7 @@ export default function NewComplaintPage() {
           transition={{ duration: 0.5 }}
         >
           <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl font-bold mb-2">
-              Nova Denúncia
-            </h1>
+            <h1 className="font-serif text-3xl font-bold mb-2">Nova Denúncia</h1>
             <p className="text-muted-foreground">
               Registre um problema urbano e ajude a melhorar Aracaju
             </p>
@@ -198,7 +208,7 @@ export default function NewComplaintPage() {
                     <FieldLabel htmlFor="description">Descrição detalhada *</FieldLabel>
                     <Textarea
                       id="description"
-                      placeholder="Descreva o problema com o máximo de detalhes possível..."
+                      placeholder="Descreva o problema com o máximo de detalhes possíveis..."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       required
@@ -216,7 +226,9 @@ export default function NewComplaintPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                            <SelectItem key={key} value={key}>{label}</SelectItem>
+                            <SelectItem key={key} value={key}>
+                              {label}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -229,11 +241,37 @@ export default function NewComplaintPage() {
                           <SelectValue placeholder="Selecione o bairro" />
                         </SelectTrigger>
                         <SelectContent>
-                          {NEIGHBORHOODS.map((n) => (
-                            <SelectItem key={n} value={n}>{n}</SelectItem>
+                          {NEIGHBORHOODS.map((item) => (
+                            <SelectItem key={item} value={item}>
+                              {item}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
+                    </Field>
+                  </div>
+
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Field>
+                      <FieldLabel htmlFor="street">Rua</FieldLabel>
+                      <Input
+                        id="street"
+                        placeholder="Ex: Av. Beira Mar"
+                        value={street}
+                        onChange={(e) => setStreet(e.target.value)}
+                        className="h-11"
+                      />
+                    </Field>
+
+                    <Field>
+                      <FieldLabel htmlFor="referencePoint">Ponto de Referência</FieldLabel>
+                      <Input
+                        id="referencePoint"
+                        placeholder="Ex: Próximo ao calçadão"
+                        value={referencePoint}
+                        onChange={(e) => setReferencePoint(e.target.value)}
+                        className="h-11"
+                      />
                     </Field>
                   </div>
 
@@ -241,31 +279,38 @@ export default function NewComplaintPage() {
                     <FieldLabel>Órgão Responsável</FieldLabel>
                     <Select value={responsibleOrgan} onValueChange={setResponsibleOrgan}>
                       <SelectTrigger className="h-11">
-                        <SelectValue placeholder="Selecione o órgão (opcional)" />
+                        <SelectValue placeholder="Selecione o Órgão (opcional)" />
                       </SelectTrigger>
                       <SelectContent>
                         {RESPONSIBLE_ORGANS.map((organ) => (
-                          <SelectItem key={organ} value={organ}>{organ}</SelectItem>
+                          <SelectItem key={organ} value={organ}>
+                            {organ}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Se você souber qual órgão deve resolver o problema
+                      Se você souber qual Órgão deve resolver o problema
                     </p>
                   </Field>
 
                   <Field>
                     <FieldLabel>Localização no Mapa *</FieldLabel>
-                    <LocationPicker 
+                    <LocationPicker
                       onLocationSelect={handleLocationSelect}
                       initialLat={latitude || undefined}
                       initialLng={longitude || undefined}
                     />
                     {latitude && longitude && (
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        Localização selecionada com sucesso
-                      </p>
+                      <div className="mt-2 space-y-1">
+                        <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          Localização selecionada com sucesso
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Bairro, rua e ponto de referência serãoo preenchidos automaticamente quando disponíveis.
+                        </p>
+                      </div>
                     )}
                   </Field>
 
@@ -273,9 +318,9 @@ export default function NewComplaintPage() {
                     <FieldLabel>Foto do Problema</FieldLabel>
                     {imagePreview ? (
                       <div className="relative rounded-lg overflow-hidden border border-border">
-                        <img 
-                          src={imagePreview} 
-                          alt="Preview" 
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
                           className="w-full h-48 object-cover"
                         />
                         <Button
@@ -304,10 +349,18 @@ export default function NewComplaintPage() {
                     )}
                   </Field>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-full h-11 bg-primary hover:bg-primary/90"
-                    disabled={isSubmitting || !title || !description || !category || !neighborhood || !latitude || !longitude}
+                    disabled={
+                      isSubmitting ||
+                      !title ||
+                      !description ||
+                      !category ||
+                      !neighborhood ||
+                      !latitude ||
+                      !longitude
+                    }
                   >
                     {isSubmitting ? (
                       <>
@@ -328,7 +381,6 @@ export default function NewComplaintPage() {
         </motion.div>
       </div>
 
-      {/* Login Modal */}
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent>
           <DialogHeader>
@@ -339,9 +391,7 @@ export default function NewComplaintPage() {
           </DialogHeader>
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
             <Link href="/login?redirect=/nova-denuncia" className="flex-1">
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Fazer Login
-              </Button>
+              <Button className="w-full bg-primary hover:bg-primary/90">Fazer Login</Button>
             </Link>
             <Link href="/cadastro" className="flex-1">
               <Button variant="outline" className="w-full">
@@ -352,7 +402,6 @@ export default function NewComplaintPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Success Modal */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
         <DialogContent className="text-center">
           <motion.div
@@ -366,8 +415,8 @@ export default function NewComplaintPage() {
           <DialogHeader>
             <DialogTitle className="font-serif text-xl">Denúncia Enviada!</DialogTitle>
             <DialogDescription>
-              Sua denúncia foi registrada com sucesso. Você pode acompanhar o status 
-              na página {"Minhas Denúncias"}.
+              Sua denúncia foi registrada com sucesso. Você pode acompanhar o status na página
+              {' Minhas Denúncias'}.
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

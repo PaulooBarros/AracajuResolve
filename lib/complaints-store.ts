@@ -60,6 +60,8 @@ export function useComplaints() {
     description: string
     category: ComplaintCategory
     neighborhood: string
+    street?: string
+    referencePoint?: string
     responsibleOrgan: string
     imageUrl?: string
     latitude: number

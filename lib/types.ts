@@ -31,6 +31,8 @@ export interface Complaint {
   description: string
   category: ComplaintCategory
   neighborhood: string
+  street?: string
+  referencePoint?: string
   status: ComplaintStatus
   priority: ComplaintPriority
   responsibleOrgan: string

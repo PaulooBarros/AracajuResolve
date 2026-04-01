@@ -212,7 +212,7 @@ export default function LocationPicker({
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('GeolocalizaÃ§Ã£o nÃ£o suportada pelo seu navegador.')
+      alert('Geolocalização não suportada pelo seu navegador.')
       return
     }
 
@@ -228,7 +228,7 @@ export default function LocationPicker({
       },
       (error) => {
         console.error('Error getting location:', error)
-        alert('NÃ£o foi possÃ­vel obter sua localizaÃ§Ã£o. Verifique as permissÃµes do navegador.')
+        alert('Não foi possível obter sua localização. Verifique as permissões do navegador.')
       },
       { enableHighAccuracy: true }
     )

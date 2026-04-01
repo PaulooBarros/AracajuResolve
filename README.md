@@ -31,19 +31,14 @@ A proposta é funcionar como um tipo de “mapa da cidade em tempo real”, onde
 * Dashboard admin (interface)
 * Dark mode
 * UI mais moderna com animações
-
----
-
-## O que ainda vai entrar
-
 * Integração com Supabase (auth + banco + storage)
-* Persistência real das denúncias
-* Upload de imagens funcionando de verdade
 * Dashboard admin com dados reais
-* Sistema de confirmação comunitária mais completo
-* Melhorias de performance no mapa
-
+* Upload de imagens funcionando de verdade
+*  Persistência real das denúncias
+*   Melhorias de performance no mapa
+*   Sistema de confirmação comunitária mais completo
 ---
+
 
 ## Tecnologias
 
@@ -54,10 +49,6 @@ A proposta é funcionar como um tipo de “mapa da cidade em tempo real”, onde
 * Leaflet (mapa)
 * OpenStreetMap
 * Framer Motion
-
-Planejado:
-
-* Supabase (backend)
 
 ---
 
@@ -110,17 +101,6 @@ src/
 * DESO → esgoto
 * Guarda Municipal → animais e poluição
 
----
-
-## Status
-
-Frontend praticamente pronto (MVP visual)
-
-Agora o foco é:
-
-* integrar com backend
-* deixar tudo persistente
-* evoluir o dashboard
 
 ---
 

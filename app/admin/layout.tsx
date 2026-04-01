@@ -37,6 +37,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import { PageTransition } from '@/components/page-transition'
 import { AuthProvider, useAuth } from '@/lib/auth-context'
 import { cn } from '@/lib/utils'
 import { Loader2 } from 'lucide-react'
@@ -248,13 +249,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
         {/* Page Content */}
         <main className="p-4 lg:p-6">
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {children}
-          </motion.div>
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
     </div>

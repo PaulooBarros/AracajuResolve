@@ -254,7 +254,7 @@ export default function LocationPicker({
           className="shadow-lg gap-2"
         >
           <Crosshair className="h-4 w-4" />
-          Usar minha localizaÃ§Ã£o
+          Usar minha localização
         </Button>
       </div>
 

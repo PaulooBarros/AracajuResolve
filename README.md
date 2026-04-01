@@ -43,7 +43,6 @@ A proposta é funcionar como um tipo de “mapa da cidade em tempo real”, onde
 ## Tecnologias
 
 * Next.js
-* React
 * Tailwind CSS
 * shadcn/ui
 * Leaflet (mapa)

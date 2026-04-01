@@ -32,6 +32,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { toast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth-context'
 import { useComplaints } from '@/lib/complaints-store'
 import { CATEGORY_LABELS, NEIGHBORHOODS, RESPONSIBLE_ORGANS, type ComplaintCategory } from '@/lib/types'
@@ -109,7 +110,11 @@ export default function NewComplaintPage() {
     }
 
     if (!latitude || !longitude || !user) {
-      alert('Selecione a localizacao do problema no mapa antes de enviar.')
+      toast({
+        title: 'Localizacao obrigatoria',
+        description: 'Selecione a localizacao do problema no mapa antes de enviar.',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -136,7 +141,11 @@ export default function NewComplaintPage() {
       }, 1800)
     } catch (error) {
       console.error(error)
-      alert('Nao foi possivel enviar a denuncia. Verifique a configuracao do Supabase e tente novamente.')
+      toast({
+        title: 'Erro ao enviar denuncia',
+        description: 'Nao foi possivel enviar a denuncia. Verifique a configuracao do Supabase e tente novamente.',
+        variant: 'destructive',
+      })
     } finally {
       setIsSubmitting(false)
     }

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { FieldGroup, Field, FieldLabel } from '@/components/ui/field'
 import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from '@/hooks/use-toast'
 import { useAuth } from '@/lib/auth-context'
 
 export default function RegisterPage() {
@@ -54,10 +55,18 @@ export default function RegisterPage() {
 
       if (result.success) {
         if (result.requiresEmailConfirmation) {
+          toast({
+            title: 'Confirme seu e-mail',
+            description: 'Enviamos um e-mail de confirmacao. Apos confirmar, voce ja pode fazer login.',
+          })
           router.push('/login')
           return
         }
 
+        toast({
+          title: 'Conta criada com sucesso',
+          description: 'Seu cadastro foi concluido e voce ja pode usar a plataforma.',
+        })
         router.push('/')
       } else {
         setError(result.error || 'Erro ao criar conta')

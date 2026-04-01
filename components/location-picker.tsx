@@ -5,6 +5,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { MapPin, Crosshair } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from '@/hooks/use-toast'
 import { NEIGHBORHOODS } from '@/lib/types'
 
 export interface ResolvedLocationDetails {
@@ -187,8 +188,8 @@ export default function LocationPicker({
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(mapRef.current)
 
-      mapRef.current.on('click', (e: L.LeafletMouseEvent) => {
-        const { lat, lng } = e.latlng
+      mapRef.current.on('click', (event: L.LeafletMouseEvent) => {
+        const { lat, lng } = event.latlng
         placeMarker(lat, lng)
         void resolveAddress(lat, lng)
       })
@@ -212,7 +213,11 @@ export default function LocationPicker({
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert('Geolocalização não suportada pelo seu navegador.')
+      toast({
+        title: 'Geolocalizacao indisponivel',
+        description: 'Geolocalizacao nao suportada pelo seu navegador.',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -228,7 +233,11 @@ export default function LocationPicker({
       },
       (error) => {
         console.error('Error getting location:', error)
-        alert('Não foi possível obter sua localização. Verifique as permissões do navegador.')
+        toast({
+          title: 'Nao foi possivel obter sua localizacao',
+          description: 'Verifique as permissoes do navegador e tente novamente.',
+          variant: 'destructive',
+        })
       },
       { enableHighAccuracy: true }
     )
@@ -238,8 +247,13 @@ export default function LocationPicker({
     <div className="relative rounded-lg overflow-hidden border border-border">
       <style jsx global>{`
         @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
         }
       `}</style>
 
@@ -254,7 +268,7 @@ export default function LocationPicker({
           className="shadow-lg gap-2"
         >
           <Crosshair className="h-4 w-4" />
-          Usar minha localização
+          Usar minha localizacao
         </Button>
       </div>
 
@@ -268,9 +282,7 @@ export default function LocationPicker({
             </span>
           </div>
           {isResolvingAddress && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Buscando endereço automaticamente...
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">Buscando endereco automaticamente...</p>
           )}
         </div>
       )}

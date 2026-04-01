@@ -4,19 +4,20 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import dynamic from 'next/dynamic'
-import { 
-  MapPin, 
-  Calendar, 
-  Building2, 
-  User, 
+import {
+  MapPin,
+  Calendar,
+  Building2,
+  User,
   ChevronLeft,
   CheckCircle2,
   AlertTriangle,
   ThumbsUp,
   Share2,
   Clock,
-  Loader2
+  Loader2,
 } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -29,17 +30,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { toast } from '@/hooks/use-toast'
 import { useComplaints } from '@/lib/complaints-store'
 import { useAuth } from '@/lib/auth-context'
-import { 
-  CATEGORY_LABELS, 
-  STATUS_LABELS, 
+import {
+  CATEGORY_LABELS,
+  STATUS_LABELS,
   PRIORITY_LABELS,
   type ComplaintStatus,
-  type ComplaintPriority
+  type ComplaintPriority,
 } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import Link from 'next/link'
 
 const MapComponent = dynamic(() => import('@/components/map-component'), {
   ssr: false,
@@ -67,15 +68,16 @@ const priorityColors: Record<ComplaintPriority, string> = {
 export default function ComplaintDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { getComplaintById, confirmComplaint, markAsResolved, isLoading } = useComplaints()
-  const { user, isAuthenticated } = useAuth()
-  
+  const { getComplaintById, confirmComplaint, markAsResolved, updateComplaint, isLoading } = useComplaints()
+  const { isAdmin } = useAuth()
+
   const [complaint, setComplaint] = useState<ReturnType<typeof getComplaintById>>(undefined)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showResolvedModal, setShowResolvedModal] = useState(false)
   const [hasConfirmed, setHasConfirmed] = useState(false)
   const [isConfirming, setIsConfirming] = useState(false)
   const [isResolving, setIsResolving] = useState(false)
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false)
 
   useEffect(() => {
     if (!isLoading && params.id) {
@@ -92,8 +94,18 @@ export default function ComplaintDetailPage() {
       await confirmComplaint(complaint.id)
       setHasConfirmed(true)
       setShowConfirmModal(false)
-      const updated = getComplaintById(complaint.id)
-      setComplaint(updated)
+      setComplaint(getComplaintById(complaint.id))
+      toast({
+        title: 'Confirmacao enviada',
+        description: 'Sua confirmacao foi registrada com sucesso.',
+      })
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Erro ao confirmar',
+        description: 'Nao foi possivel confirmar esta denuncia.',
+        variant: 'destructive',
+      })
     } finally {
       setIsConfirming(false)
     }
@@ -106,28 +118,70 @@ export default function ComplaintDetailPage() {
     try {
       await markAsResolved(complaint.id)
       setShowResolvedModal(false)
-      const updated = getComplaintById(complaint.id)
-      setComplaint(updated)
+      setComplaint(getComplaintById(complaint.id))
+      toast({
+        title: 'Denuncia atualizada',
+        description: 'A denuncia foi marcada como resolvida.',
+      })
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Erro ao atualizar',
+        description: 'Nao foi possivel marcar a denuncia como resolvida.',
+        variant: 'destructive',
+      })
     } finally {
       setIsResolving(false)
     }
   }
 
   const handleShare = async () => {
+    if (!complaint) return
+
     if (navigator.share) {
       try {
         await navigator.share({
-          title: complaint?.title,
-          text: complaint?.description,
+          title: complaint.title,
+          text: complaint.description,
           url: window.location.href,
         })
-      } catch (err) {
-        // User cancelled share
+      } catch (_error) {
+        return
       }
     } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href)
-      alert('Link copiado para a área de transferência!')
+      await navigator.clipboard.writeText(window.location.href)
+      toast({
+        title: 'Link copiado',
+        description: 'O link da denuncia foi copiado para a area de transferencia.',
+      })
+    }
+  }
+
+  const handleAdminStatusUpdate = async (status: ComplaintStatus) => {
+    if (!complaint) return
+    setIsUpdatingStatus(true)
+
+    try {
+      if (status === 'resolvida') {
+        await markAsResolved(complaint.id)
+      } else {
+        await updateComplaint(complaint.id, { status })
+      }
+
+      setComplaint(getComplaintById(complaint.id))
+      toast({
+        title: 'Status atualizado',
+        description: `A denuncia foi marcada como ${STATUS_LABELS[status].toLowerCase()}.`,
+      })
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Erro ao atualizar',
+        description: 'Nao foi possivel atualizar o status da denuncia.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsUpdatingStatus(false)
     }
   }
 
@@ -143,12 +197,12 @@ export default function ComplaintDetailPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <AlertTriangle className="h-16 w-16 text-muted-foreground" />
-        <h1 className="text-2xl font-serif font-bold">Denúncia não encontrada</h1>
-        <p className="text-muted-foreground">A denúncia que você procura não existe ou foi removida.</p>
+        <h1 className="text-2xl font-serif font-bold">Denuncia nao encontrada</h1>
+        <p className="text-muted-foreground">A denuncia que voce procura nao existe ou foi removida.</p>
         <Link href="/denuncias">
           <Button variant="outline">
             <ChevronLeft className="h-4 w-4 mr-2" />
-            Voltar para denúncias
+            Voltar para denuncias
           </Button>
         </Link>
       </div>
@@ -174,15 +228,14 @@ export default function ComplaintDetailPage() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.3 }}
           className="mb-6"
         >
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={() => router.back()}
             className="gap-2 text-muted-foreground hover:text-foreground"
           >
@@ -192,31 +245,27 @@ export default function ComplaintDetailPage() {
         </motion.div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="lg:col-span-2 space-y-6"
           >
-            {/* Header */}
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <Badge variant="outline" className={cn("font-medium", statusColors[complaint.status])}>
+                <Badge variant="outline" className={cn('font-medium', statusColors[complaint.status])}>
                   {STATUS_LABELS[complaint.status]}
                 </Badge>
-                <Badge variant="outline" className={cn("font-medium", priorityColors[complaint.priority])}>
+                <Badge variant="outline" className={cn('font-medium', priorityColors[complaint.priority])}>
                   {PRIORITY_LABELS[complaint.priority]}
                 </Badge>
-                <Badge variant="secondary">
-                  {CATEGORY_LABELS[complaint.category]}
-                </Badge>
+                <Badge variant="secondary">{CATEGORY_LABELS[complaint.category]}</Badge>
               </div>
-              
+
               <h1 className="font-serif text-2xl sm:text-3xl font-bold mb-2 text-balance">
                 {complaint.title}
               </h1>
-              
+
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <User className="h-4 w-4" />
@@ -229,7 +278,6 @@ export default function ComplaintDetailPage() {
               </div>
             </div>
 
-            {/* Image */}
             {complaint.imageUrl && (
               <div className="rounded-xl overflow-hidden border border-border">
                 <img
@@ -240,10 +288,9 @@ export default function ComplaintDetailPage() {
               </div>
             )}
 
-            {/* Description */}
             <Card>
               <CardHeader>
-                <CardTitle className="font-serif text-lg">Descrição do Problema</CardTitle>
+                <CardTitle className="font-serif text-lg">Descricao do problema</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
@@ -252,20 +299,16 @@ export default function ComplaintDetailPage() {
               </CardContent>
             </Card>
 
-            {/* Location Map */}
             <Card>
               <CardHeader>
                 <CardTitle className="font-serif text-lg flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  Localização
+                  Localizacao
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="rounded-lg overflow-hidden border border-border h-[300px]">
-                  <MapComponent 
-                    complaints={[complaint]} 
-                    selectedComplaintId={complaint.id}
-                  />
+                  <MapComponent complaints={[complaint]} selectedComplaintId={complaint.id} />
                 </div>
                 <p className="mt-3 text-sm text-muted-foreground">
                   {complaint.neighborhood}, Aracaju - SE
@@ -274,31 +317,60 @@ export default function ComplaintDetailPage() {
             </Card>
           </motion.div>
 
-          {/* Sidebar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="space-y-4"
           >
-            {/* Actions Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="font-serif text-lg">Ações</CardTitle>
+                <CardTitle className="font-serif text-lg">Acoes</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
+                {isAdmin && (
+                  <>
+                    <Button
+                      variant="outline"
+                      className="w-full gap-2"
+                      onClick={() => handleAdminStatusUpdate('em_andamento')}
+                      disabled={complaint.status === 'em_andamento' || isUpdatingStatus}
+                    >
+                      {isUpdatingStatus && complaint.status !== 'em_andamento' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Clock className="h-4 w-4" />
+                      )}
+                      Marcar em andamento
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full gap-2 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600"
+                      onClick={() => handleAdminStatusUpdate('resolvida')}
+                      disabled={complaint.status === 'resolvida' || isUpdatingStatus}
+                    >
+                      {isUpdatingStatus && complaint.status !== 'resolvida' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="h-4 w-4" />
+                      )}
+                      Marcar resolvida
+                    </Button>
+                  </>
+                )}
+
                 {complaint.status !== 'resolvida' && complaint.status !== 'arquivada' && (
                   <>
-                    <Button 
+                    <Button
                       className="w-full gap-2 bg-primary hover:bg-primary/90"
                       onClick={() => setShowConfirmModal(true)}
                       disabled={hasConfirmed}
                     >
                       <ThumbsUp className="h-4 w-4" />
-                      {hasConfirmed ? 'Confirmação enviada' : 'Confirmar problema'}
+                      {hasConfirmed ? 'Confirmacao enviada' : 'Confirmar problema'}
                     </Button>
-                    
-                    <Button 
+
+                    <Button
                       variant="outline"
                       className="w-full gap-2 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600"
                       onClick={() => setShowResolvedModal(true)}
@@ -308,7 +380,7 @@ export default function ComplaintDetailPage() {
                     </Button>
                   </>
                 )}
-                
+
                 {complaint.status === 'resolvida' && (
                   <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                     <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
@@ -316,28 +388,23 @@ export default function ComplaintDetailPage() {
                       <span className="font-medium">Problema resolvido!</span>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Esta denúncia foi marcada como resolvida.
+                      Esta denuncia foi marcada como resolvida.
                     </p>
                   </div>
                 )}
 
                 <Separator />
 
-                <Button 
-                  variant="ghost" 
-                  className="w-full gap-2"
-                  onClick={handleShare}
-                >
+                <Button variant="ghost" className="w-full gap-2" onClick={handleShare}>
                   <Share2 className="h-4 w-4" />
                   Compartilhar
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Info Card */}
             <Card>
               <CardHeader>
-                <CardTitle className="font-serif text-lg">Informações</CardTitle>
+                <CardTitle className="font-serif text-lg">Informacoes</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
@@ -346,7 +413,7 @@ export default function ComplaintDetailPage() {
                   </div>
                   <div>
                     <p className="font-medium">{complaint.confirmations}</p>
-                    <p className="text-sm text-muted-foreground">Confirmações</p>
+                    <p className="text-sm text-muted-foreground">Confirmacoes</p>
                   </div>
                 </div>
 
@@ -358,7 +425,7 @@ export default function ComplaintDetailPage() {
                   </div>
                   <div>
                     <p className="font-medium text-sm">{complaint.responsibleOrgan}</p>
-                    <p className="text-xs text-muted-foreground">Órgão Responsável</p>
+                    <p className="text-xs text-muted-foreground">Orgao responsavel</p>
                   </div>
                 </div>
 
@@ -381,7 +448,7 @@ export default function ComplaintDetailPage() {
                     <Clock className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">Última atualização</p>
+                    <p className="font-medium text-sm">Ultima atualizacao</p>
                     <p className="text-xs text-muted-foreground">{formattedUpdateDate}</p>
                   </div>
                 </div>
@@ -391,25 +458,20 @@ export default function ComplaintDetailPage() {
         </div>
       </div>
 
-      {/* Confirm Modal */}
       <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="font-serif">Confirmar problema</DialogTitle>
             <DialogDescription>
-              Ao confirmar, você está informando que este problema ainda existe no local indicado. 
-              Isso ajuda a priorizar as denúncias mais urgentes.
+              Ao confirmar, voce esta informando que este problema ainda existe no local indicado.
+              Isso ajuda a priorizar as denuncias mais urgentes.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setShowConfirmModal(false)}>
               Cancelar
             </Button>
-            <Button 
-              onClick={handleConfirm}
-              disabled={isConfirming}
-              className="bg-primary hover:bg-primary/90"
-            >
+            <Button onClick={handleConfirm} disabled={isConfirming} className="bg-primary hover:bg-primary/90">
               {isConfirming ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -426,14 +488,12 @@ export default function ComplaintDetailPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Resolved Modal */}
       <Dialog open={showResolvedModal} onOpenChange={setShowResolvedModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif">Informar resolução</DialogTitle>
+            <DialogTitle className="font-serif">Informar resolucao</DialogTitle>
             <DialogDescription>
-              Você está informando que este problema foi resolvido. 
-              Esta ação ajuda a manter o sistema atualizado e fecha a denúncia.
+              Voce esta informando que este problema foi resolvido. Esta acao ajuda a manter o sistema atualizado e fecha a denuncia.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -441,8 +501,8 @@ export default function ComplaintDetailPage() {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-muted-foreground">
-                  Certifique-se de que o problema foi realmente resolvido antes de confirmar. 
-                  Informações falsas podem prejudicar a comunidade.
+                  Certifique-se de que o problema foi realmente resolvido antes de confirmar.
+                  Informacoes falsas podem prejudicar a comunidade.
                 </p>
               </div>
             </div>
@@ -451,11 +511,7 @@ export default function ComplaintDetailPage() {
             <Button variant="outline" onClick={() => setShowResolvedModal(false)}>
               Cancelar
             </Button>
-            <Button 
-              onClick={handleMarkResolved}
-              disabled={isResolving}
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
+            <Button onClick={handleMarkResolved} disabled={isResolving} className="bg-emerald-600 hover:bg-emerald-700">
               {isResolving ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -464,7 +520,7 @@ export default function ComplaintDetailPage() {
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Confirmar resolução
+                  Confirmar resolucao
                 </>
               )}
             </Button>

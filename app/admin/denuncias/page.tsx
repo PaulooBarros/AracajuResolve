@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { 
   Search, 
@@ -13,7 +14,8 @@ import {
   CheckCircle2,
   Clock,
   Archive,
-  Download
+  Download,
+  Loader2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,6 +44,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ComplaintCard } from '@/components/complaint-card'
+import { toast } from '@/hooks/use-toast'
 import { useComplaints } from '@/lib/complaints-store'
 import { 
   CATEGORY_LABELS, 
@@ -69,13 +72,14 @@ const priorityColors: Record<ComplaintPriority, string> = {
 }
 
 export default function AdminComplaintsPage() {
-  const { complaints } = useComplaints()
+  const { complaints, updateComplaint } = useComplaints()
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
   const [neighborhoodFilter, setNeighborhoodFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table')
+  const [updatingComplaintId, setUpdatingComplaintId] = useState<string | null>(null)
 
   const activeFilters = [
     categoryFilter !== 'all' && { key: 'category', label: CATEGORY_LABELS[categoryFilter as ComplaintCategory] },
@@ -113,6 +117,27 @@ export default function AdminComplaintsPage() {
       return matchesSearch && matchesCategory && matchesStatus && matchesPriority && matchesNeighborhood
     })
   }, [complaints, search, categoryFilter, statusFilter, priorityFilter, neighborhoodFilter])
+
+  const handleStatusUpdate = async (complaintId: string, status: ComplaintStatus) => {
+    setUpdatingComplaintId(complaintId)
+
+    try {
+      await updateComplaint(complaintId, { status })
+      toast({
+        title: 'Status atualizado',
+        description: `A denuncia foi marcada como ${STATUS_LABELS[status].toLowerCase()}.`,
+      })
+    } catch (error) {
+      console.error(error)
+      toast({
+        title: 'Erro ao atualizar',
+        description: 'Nao foi possivel atualizar o status da denuncia.',
+        variant: 'destructive',
+      })
+    } finally {
+      setUpdatingComplaintId(null)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -309,26 +334,44 @@ export default function AdminComplaintsPage() {
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={updatingComplaintId === complaint.id}>
+                          {updatingComplaintId === complaint.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <MoreHorizontal className="h-4 w-4" />
+                          )}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem className="gap-2">
-                          <Eye className="h-4 w-4" />
-                          Ver detalhes
+                        <DropdownMenuItem asChild className="gap-2">
+                          <Link href={`/denuncia/${complaint.id}`}>
+                            <Eye className="h-4 w-4" />
+                            Ver detalhes
+                          </Link>
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem
+                          className="gap-2"
+                          onClick={() => handleStatusUpdate(complaint.id, 'em_andamento')}
+                          disabled={complaint.status === 'em_andamento' || updatingComplaintId === complaint.id}
+                        >
                           <Clock className="h-4 w-4" />
                           Marcar em andamento
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2 text-emerald-600">
+                        <DropdownMenuItem
+                          className="gap-2 text-emerald-600"
+                          onClick={() => handleStatusUpdate(complaint.id, 'resolvida')}
+                          disabled={complaint.status === 'resolvida' || updatingComplaintId === complaint.id}
+                        >
                           <CheckCircle2 className="h-4 w-4" />
                           Marcar resolvida
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 text-muted-foreground">
+                        <DropdownMenuItem
+                          className="gap-2 text-muted-foreground"
+                          onClick={() => handleStatusUpdate(complaint.id, 'arquivada')}
+                          disabled={complaint.status === 'arquivada' || updatingComplaintId === complaint.id}
+                        >
                           <Archive className="h-4 w-4" />
                           Arquivar
                         </DropdownMenuItem>

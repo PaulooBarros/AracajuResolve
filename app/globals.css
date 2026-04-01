@@ -165,15 +165,15 @@
   * {
     @apply border-border outline-ring/50;
   }
-  *,
-  *::before,
-  *::after {
-    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
-    transition-duration: 220ms;
-    transition-timing-function: ease;
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
   body {
     @apply bg-background text-foreground;
+    transition: background-color 160ms ease, color 160ms ease;
   }
   button:not(:disabled),
   [role='button']:not([aria-disabled='true']) {

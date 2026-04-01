@@ -1,129 +1,242 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import type { Complaint, ComplaintCategory, ComplaintStatus, ComplaintPriority } from './types'
-import { mockComplaints } from './mock-data'
+import { useCallback, useEffect, useState } from 'react'
+import type { Complaint, ComplaintCategory } from './types'
+import { getSupabaseBrowserClient, isSupabaseConfigured } from '@/lib/supabase/client'
+import { mapComplaintRecord, type ComplaintRecord } from '@/lib/supabase/mappers'
 
-const STORAGE_KEY = 'aracaju-resolve-complaints'
-const STORAGE_VERSION_KEY = 'aracaju-resolve-version'
-const CURRENT_VERSION = '2' // Increment when mock data structure changes
-
-// Initialize localStorage with mock data if empty or outdated
-function getInitialComplaints(): Complaint[] {
-  if (typeof window === 'undefined') return mockComplaints
-  
-  const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY)
-  const stored = localStorage.getItem(STORAGE_KEY)
-  
-  // If version mismatch, reset to new mock data
-  if (storedVersion !== CURRENT_VERSION) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockComplaints))
-    localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION)
-    return mockComplaints
-  }
-  
-  if (stored) {
-    try {
-      const parsed = JSON.parse(stored)
-      return parsed.map((c: Complaint) => ({
-        ...c,
-        createdAt: new Date(c.createdAt),
-        updatedAt: new Date(c.updatedAt),
-      }))
-    } catch {
-      return mockComplaints
-    }
-  }
-  
-  // Initialize with mock data
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(mockComplaints))
-  localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION)
-  return mockComplaints
+interface NewComplaintInput {
+  title: string
+  description: string
+  category: ComplaintCategory
+  neighborhood: string
+  street?: string
+  referencePoint?: string
+  responsibleOrgan: string
+  imageFile?: File | null
+  latitude: number
+  longitude: number
+  userId: string
 }
 
-function saveComplaints(complaints: Complaint[]) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(complaints))
+async function uploadComplaintImage(file: File, userId: string) {
+  const supabase = getSupabaseBrowserClient()
+  const extension = file.name.split('.').pop() || 'jpg'
+  const filePath = `${userId}/${crypto.randomUUID()}.${extension}`
+
+  const { error } = await supabase.storage.from('complaint-images').upload(filePath, file, {
+    cacheControl: '3600',
+    upsert: false,
+  })
+
+  if (error) {
+    throw error
+  }
+
+  const { data } = supabase.storage.from('complaint-images').getPublicUrl(filePath)
+  return data.publicUrl
+}
+
+async function fetchComplaintsFromSupabase() {
+  if (!isSupabaseConfigured()) {
+    return []
+  }
+
+  const supabase = getSupabaseBrowserClient()
+  const { data, error } = await supabase
+    .from('complaints')
+    .select(`
+      id,
+      title,
+      description,
+      category,
+      neighborhood,
+      street,
+      reference_point,
+      status,
+      priority,
+      responsible_organ,
+      image_url,
+      latitude,
+      longitude,
+      user_id,
+      confirmations_count,
+      created_at,
+      updated_at,
+      profiles (
+        id,
+        email,
+        full_name,
+        role,
+        avatar_url,
+        created_at
+      )
+    `)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    throw error
+  }
+
+  return (data as ComplaintRecord[]).map(mapComplaintRecord)
 }
 
 export function useComplaints() {
   const [complaints, setComplaints] = useState<Complaint[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    setComplaints(getInitialComplaints())
-    setIsLoading(false)
-  }, [])
-
-  const addComplaint = useCallback((complaintData: {
-    title: string
-    description: string
-    category: ComplaintCategory
-    neighborhood: string
-    street?: string
-    referencePoint?: string
-    responsibleOrgan: string
-    imageUrl?: string
-    latitude: number
-    longitude: number
-    userId: string
-    userName: string
-  }) => {
-    const newComplaint: Complaint = {
-      id: `user-${Date.now()}`,
-      ...complaintData,
-      status: 'aberta' as ComplaintStatus,
-      priority: 'media' as ComplaintPriority,
-      confirmations: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  const refreshComplaints = useCallback(async () => {
+    if (!isSupabaseConfigured()) {
+      setComplaints([])
+      setIsLoading(false)
+      return
     }
 
-    setComplaints(prev => {
-      const updated = [newComplaint, ...prev]
-      saveComplaints(updated)
-      return updated
-    })
+    setIsLoading(true)
 
-    return newComplaint
+    try {
+      const nextComplaints = await fetchComplaintsFromSupabase()
+      setComplaints(nextComplaints)
+    } catch (error) {
+      console.error(error)
+      setComplaints([])
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
-  const updateComplaint = useCallback((id: string, updates: Partial<Complaint>) => {
-    setComplaints(prev => {
-      const updated = prev.map(c => 
-        c.id === id ? { ...c, ...updates, updatedAt: new Date() } : c
-      )
-      saveComplaints(updated)
-      return updated
-    })
+  useEffect(() => {
+    void refreshComplaints()
+  }, [refreshComplaints])
+
+  const addComplaint = useCallback(async (complaintData: NewComplaintInput) => {
+    const supabase = getSupabaseBrowserClient()
+    let imageUrl: string | undefined
+
+    if (complaintData.imageFile) {
+      imageUrl = await uploadComplaintImage(complaintData.imageFile, complaintData.userId)
+    }
+
+    const { data, error } = await supabase
+      .from('complaints')
+      .insert({
+        title: complaintData.title,
+        description: complaintData.description,
+        category: complaintData.category,
+        neighborhood: complaintData.neighborhood,
+        street: complaintData.street || null,
+        reference_point: complaintData.referencePoint || null,
+        responsible_organ: complaintData.responsibleOrgan || 'A definir',
+        image_url: imageUrl || null,
+        latitude: complaintData.latitude,
+        longitude: complaintData.longitude,
+        user_id: complaintData.userId,
+      })
+      .select(`
+        id,
+        title,
+        description,
+        category,
+        neighborhood,
+        street,
+        reference_point,
+        status,
+        priority,
+        responsible_organ,
+        image_url,
+        latitude,
+        longitude,
+        user_id,
+        confirmations_count,
+        created_at,
+        updated_at,
+        profiles (
+          id,
+          email,
+          full_name,
+          role,
+          avatar_url,
+          created_at
+        )
+      `)
+      .single()
+
+    if (error) {
+      throw error
+    }
+
+    const complaint = mapComplaintRecord(data as ComplaintRecord)
+    setComplaints((current) => [complaint, ...current])
+    return complaint
   }, [])
 
-  const confirmComplaint = useCallback((id: string) => {
-    setComplaints(prev => {
-      const updated = prev.map(c => 
-        c.id === id ? { ...c, confirmations: c.confirmations + 1, updatedAt: new Date() } : c
-      )
-      saveComplaints(updated)
-      return updated
-    })
-  }, [])
+  const updateComplaint = useCallback(async (id: string, updates: Partial<Complaint>) => {
+    const supabase = getSupabaseBrowserClient()
+    const payload: Record<string, unknown> = {}
 
-  const markAsResolved = useCallback((id: string) => {
-    setComplaints(prev => {
-      const updated = prev.map(c => 
-        c.id === id ? { ...c, status: 'resolvida' as ComplaintStatus, updatedAt: new Date() } : c
-      )
-      saveComplaints(updated)
-      return updated
+    if (updates.title !== undefined) payload.title = updates.title
+    if (updates.description !== undefined) payload.description = updates.description
+    if (updates.category !== undefined) payload.category = updates.category
+    if (updates.neighborhood !== undefined) payload.neighborhood = updates.neighborhood
+    if (updates.street !== undefined) payload.street = updates.street || null
+    if (updates.referencePoint !== undefined) payload.reference_point = updates.referencePoint || null
+    if (updates.status !== undefined) payload.status = updates.status
+    if (updates.priority !== undefined) payload.priority = updates.priority
+    if (updates.responsibleOrgan !== undefined) payload.responsible_organ = updates.responsibleOrgan
+    if (updates.imageUrl !== undefined) payload.image_url = updates.imageUrl || null
+
+    const { error } = await supabase.from('complaints').update(payload).eq('id', id)
+
+    if (error) {
+      throw error
+    }
+
+    await refreshComplaints()
+  }, [refreshComplaints])
+
+  const confirmComplaint = useCallback(async (id: string) => {
+    const supabase = getSupabaseBrowserClient()
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      throw userError || new Error('Usuário não autenticado.')
+    }
+
+    const { error } = await supabase.from('complaint_confirmations').insert({
+      complaint_id: id,
+      user_id: user.id,
     })
-  }, [])
+
+    if (error) {
+      throw error
+    }
+
+    await refreshComplaints()
+  }, [refreshComplaints])
+
+  const markAsResolved = useCallback(async (id: string) => {
+    const supabase = getSupabaseBrowserClient()
+    const { error } = await supabase
+      .from('complaints')
+      .update({ status: 'resolvida' })
+      .eq('id', id)
+
+    if (error) {
+      throw error
+    }
+
+    await refreshComplaints()
+  }, [refreshComplaints])
 
   const getComplaintById = useCallback((id: string) => {
-    return complaints.find(c => c.id === id)
+    return complaints.find((complaint) => complaint.id === id)
   }, [complaints])
 
   const getUserComplaints = useCallback((userId: string) => {
-    return complaints.filter(c => c.userId === userId)
+    return complaints.filter((complaint) => complaint.userId === userId)
   }, [complaints])
 
   return {
@@ -135,5 +248,6 @@ export function useComplaints() {
     markAsResolved,
     getComplaintById,
     getUserComplaints,
+    refreshComplaints,
   }
 }

@@ -87,34 +87,30 @@ export default function ComplaintDetailPage() {
   const handleConfirm = async () => {
     if (!complaint) return
     setIsConfirming(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    confirmComplaint(complaint.id)
-    setHasConfirmed(true)
-    setShowConfirmModal(false)
-    setIsConfirming(false)
-    
-    // Refresh complaint data
-    const updated = getComplaintById(complaint.id)
-    setComplaint(updated)
+
+    try {
+      await confirmComplaint(complaint.id)
+      setHasConfirmed(true)
+      setShowConfirmModal(false)
+      const updated = getComplaintById(complaint.id)
+      setComplaint(updated)
+    } finally {
+      setIsConfirming(false)
+    }
   }
 
   const handleMarkResolved = async () => {
     if (!complaint) return
     setIsResolving(true)
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    markAsResolved(complaint.id)
-    setShowResolvedModal(false)
-    setIsResolving(false)
-    
-    // Refresh complaint data
-    const updated = getComplaintById(complaint.id)
-    setComplaint(updated)
+
+    try {
+      await markAsResolved(complaint.id)
+      setShowResolvedModal(false)
+      const updated = getComplaintById(complaint.id)
+      setComplaint(updated)
+    } finally {
+      setIsResolving(false)
+    }
   }
 
   const handleShare = async () => {

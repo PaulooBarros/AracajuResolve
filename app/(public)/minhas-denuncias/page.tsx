@@ -20,8 +20,7 @@ export default function MyComplaintsPage() {
   // Filter complaints by current user
   const userComplaints = useMemo(() => {
     if (!user) return []
-    // Show complaints from current user + demo complaints
-    return complaints.filter(c => c.userId === user.id || c.userId === '1' || c.userId === '2')
+    return complaints.filter(c => c.userId === user.id)
   }, [user, complaints])
 
   const openComplaints = userComplaints.filter(c => c.status === 'aberta')

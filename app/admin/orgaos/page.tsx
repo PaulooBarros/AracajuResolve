@@ -1,12 +1,12 @@
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { 
-  Building2, 
-  FileText, 
-  CheckCircle2, 
+import {
+  Building2,
+  FileText,
+  CheckCircle2,
   Clock,
-  TrendingUp,
   MoreHorizontal,
   Edit,
   Trash2,
@@ -31,7 +31,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { mockResponsibleOrgans } from '@/lib/mock-data'
+import { useComplaints } from '@/lib/complaints-store'
 import { CATEGORY_LABELS } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -41,34 +41,88 @@ const fadeInUp = {
 }
 
 export default function AdminOrgaosPage() {
-  const totalComplaints = mockResponsibleOrgans.reduce((acc, org) => acc + org.complaintsCount, 0)
-  const totalResolved = mockResponsibleOrgans.reduce((acc, org) => acc + org.resolvedCount, 0)
-  const avgResolution = Math.round(mockResponsibleOrgans.reduce((acc, org) => acc + org.avgResolutionDays, 0) / mockResponsibleOrgans.length)
+  const { complaints } = useComplaints()
+
+  const organs = useMemo(() => {
+    return Object.entries(
+      complaints.reduce<
+        Record<
+          string,
+          {
+            id: string
+            name: string
+            categories: Set<string>
+            complaintsCount: number
+            resolvedCount: number
+            resolutionDays: number[]
+          }
+        >
+      >((acc, complaint) => {
+        const organName = complaint.responsibleOrgan || 'A definir'
+        const organId = organName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+
+        if (!acc[organName]) {
+          acc[organName] = {
+            id: organId,
+            name: organName,
+            categories: new Set<string>(),
+            complaintsCount: 0,
+            resolvedCount: 0,
+            resolutionDays: [],
+          }
+        }
+
+        acc[organName].complaintsCount += 1
+        acc[organName].categories.add(complaint.category)
+
+        if (complaint.status === 'resolvida') {
+          acc[organName].resolvedCount += 1
+          const diffDays = Math.max(
+            1,
+            Math.round((complaint.updatedAt.getTime() - complaint.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+          )
+          acc[organName].resolutionDays.push(diffDays)
+        }
+
+        return acc
+      }, {})
+    )
+      .map(([, organ]) => ({
+        id: organ.id,
+        name: organ.name,
+        categories: Array.from(organ.categories),
+        complaintsCount: organ.complaintsCount,
+        resolvedCount: organ.resolvedCount,
+        avgResolutionDays: organ.resolutionDays.length > 0
+          ? Math.round(organ.resolutionDays.reduce((acc, value) => acc + value, 0) / organ.resolutionDays.length)
+          : 0,
+      }))
+      .sort((a, b) => b.complaintsCount - a.complaintsCount)
+  }, [complaints])
+
+  const totalComplaints = organs.reduce((acc, organ) => acc + organ.complaintsCount, 0)
+  const totalResolved = organs.reduce((acc, organ) => acc + organ.resolvedCount, 0)
+  const avgResolution = organs.length > 0
+    ? Math.round(organs.reduce((acc, organ) => acc + organ.avgResolutionDays, 0) / organs.length)
+    : 0
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-bold">Órgãos Responsáveis</h1>
+          <h1 className="font-serif text-2xl font-bold">Orgaos responsaveis</h1>
           <p className="text-muted-foreground text-sm">
-            Gerencie os órgãos e secretarias responsáveis pelas denúncias
+            Visao consolidada dos orgaos e secretarias ligados as denuncias reais
           </p>
         </div>
         <Button className="bg-primary hover:bg-primary/90 gap-2">
           <Plus className="h-4 w-4" />
-          Novo Órgão
+          Novo orgao
         </Button>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <motion.div
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-          transition={{ duration: 0.3 }}
-        >
+        <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3 }}>
           <Card className="border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -76,8 +130,8 @@ export default function AdminOrgaosPage() {
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-serif text-3xl font-bold">{mockResponsibleOrgans.length}</p>
-                  <p className="text-sm text-muted-foreground">Órgãos Cadastrados</p>
+                  <p className="font-serif text-3xl font-bold">{organs.length}</p>
+                  <p className="text-sm text-muted-foreground">Orgaos identificados</p>
                 </div>
               </div>
             </CardContent>
@@ -98,9 +152,9 @@ export default function AdminOrgaosPage() {
                 </div>
                 <div>
                   <p className="font-serif text-3xl font-bold">
-                    {Math.round((totalResolved / totalComplaints) * 100)}%
+                    {totalComplaints > 0 ? Math.round((totalResolved / totalComplaints) * 100) : 0}%
                   </p>
-                  <p className="text-sm text-muted-foreground">Taxa de Resolução</p>
+                  <p className="text-sm text-muted-foreground">Taxa de resolucao</p>
                 </div>
               </div>
             </CardContent>
@@ -121,7 +175,7 @@ export default function AdminOrgaosPage() {
                 </div>
                 <div>
                   <p className="font-serif text-3xl font-bold">{avgResolution} dias</p>
-                  <p className="text-sm text-muted-foreground">Tempo Médio Resolução</p>
+                  <p className="text-sm text-muted-foreground">Tempo medio de resolucao</p>
                 </div>
               </div>
             </CardContent>
@@ -129,7 +183,6 @@ export default function AdminOrgaosPage() {
         </motion.div>
       </div>
 
-      {/* Organs Table */}
       <motion.div
         variants={fadeInUp}
         initial="initial"
@@ -138,26 +191,27 @@ export default function AdminOrgaosPage() {
       >
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="font-serif text-base font-semibold">
-              Lista de Órgãos
-            </CardTitle>
+            <CardTitle className="font-serif text-base font-semibold">Lista de orgaos</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs">Órgão</TableHead>
+                  <TableHead className="text-xs">Orgao</TableHead>
                   <TableHead className="text-xs">Categorias</TableHead>
-                  <TableHead className="text-xs">Denúncias</TableHead>
+                  <TableHead className="text-xs">Denuncias</TableHead>
                   <TableHead className="text-xs">Resolvidas</TableHead>
                   <TableHead className="text-xs">Taxa</TableHead>
-                  <TableHead className="text-xs">Tempo Médio</TableHead>
-                  <TableHead className="text-xs text-right">Ações</TableHead>
+                  <TableHead className="text-xs">Tempo medio</TableHead>
+                  <TableHead className="text-xs text-right">Acoes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockResponsibleOrgans.map((organ) => {
-                  const rate = Math.round((organ.resolvedCount / organ.complaintsCount) * 100)
+                {organs.map((organ) => {
+                  const rate = organ.complaintsCount > 0
+                    ? Math.round((organ.resolvedCount / organ.complaintsCount) * 100)
+                    : 0
+
                   return (
                     <TableRow key={organ.id}>
                       <TableCell className="font-medium text-sm">
@@ -170,9 +224,9 @@ export default function AdminOrgaosPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {organ.categories.slice(0, 2).map((cat) => (
-                            <Badge key={cat} variant="secondary" className="text-xs">
-                              {CATEGORY_LABELS[cat]}
+                          {organ.categories.slice(0, 2).map((category) => (
+                            <Badge key={category} variant="secondary" className="text-xs">
+                              {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}
                             </Badge>
                           ))}
                           {organ.categories.length > 2 && (
@@ -191,10 +245,12 @@ export default function AdminOrgaosPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-sm">
-                        <span className={cn(
-                          organ.avgResolutionDays <= 5 ? 'text-emerald-600' : 
-                          organ.avgResolutionDays <= 10 ? 'text-amber-600' : 'text-red-600'
-                        )}>
+                        <span
+                          className={cn(
+                            organ.avgResolutionDays <= 5 ? 'text-emerald-600' :
+                              organ.avgResolutionDays <= 10 ? 'text-amber-600' : 'text-red-600'
+                          )}
+                        >
                           {organ.avgResolutionDays} dias
                         </span>
                       </TableCell>
@@ -208,7 +264,7 @@ export default function AdminOrgaosPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem className="gap-2">
                               <FileText className="h-4 w-4" />
-                              Ver denúncias
+                              Ver denuncias
                             </DropdownMenuItem>
                             <DropdownMenuItem className="gap-2">
                               <Edit className="h-4 w-4" />
@@ -231,7 +287,6 @@ export default function AdminOrgaosPage() {
         </Card>
       </motion.div>
 
-      {/* Performance Overview */}
       <div className="grid lg:grid-cols-2 gap-6">
         <motion.div
           variants={fadeInUp}
@@ -241,26 +296,33 @@ export default function AdminOrgaosPage() {
         >
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-serif text-base font-semibold">
-                Ranking por Eficiência
-              </CardTitle>
+              <CardTitle className="font-serif text-base font-semibold">Ranking por eficiencia</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[...mockResponsibleOrgans]
-                  .sort((a, b) => (b.resolvedCount / b.complaintsCount) - (a.resolvedCount / a.complaintsCount))
+                {[...organs]
+                  .sort((a, b) => {
+                    const rateA = a.complaintsCount > 0 ? a.resolvedCount / a.complaintsCount : 0
+                    const rateB = b.complaintsCount > 0 ? b.resolvedCount / b.complaintsCount : 0
+                    return rateB - rateA
+                  })
                   .slice(0, 5)
                   .map((organ, index) => {
-                    const rate = Math.round((organ.resolvedCount / organ.complaintsCount) * 100)
+                    const rate = organ.complaintsCount > 0
+                      ? Math.round((organ.resolvedCount / organ.complaintsCount) * 100)
+                      : 0
+
                     return (
                       <div key={organ.id} className="flex items-center gap-4">
-                        <span className={cn(
-                          "flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium",
-                          index === 0 ? "bg-amber-500 text-white" :
-                          index === 1 ? "bg-slate-400 text-white" :
-                          index === 2 ? "bg-amber-700 text-white" :
-                          "bg-muted text-muted-foreground"
-                        )}>
+                        <span
+                          className={cn(
+                            'flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium',
+                            index === 0 ? 'bg-amber-500 text-white' :
+                              index === 1 ? 'bg-slate-400 text-white' :
+                                index === 2 ? 'bg-amber-700 text-white' :
+                                  'bg-muted text-muted-foreground'
+                          )}
+                        >
                           {index + 1}
                         </span>
                         <div className="flex-1 min-w-0">
@@ -286,33 +348,33 @@ export default function AdminOrgaosPage() {
         >
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-serif text-base font-semibold">
-                Ranking por Velocidade
-              </CardTitle>
+              <CardTitle className="font-serif text-base font-semibold">Ranking por velocidade</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[...mockResponsibleOrgans]
+                {[...organs]
                   .sort((a, b) => a.avgResolutionDays - b.avgResolutionDays)
                   .slice(0, 5)
                   .map((organ, index) => (
                     <div key={organ.id} className="flex items-center gap-4">
-                      <span className={cn(
-                        "flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium",
-                        index === 0 ? "bg-emerald-500 text-white" :
-                        index === 1 ? "bg-emerald-400 text-white" :
-                        index === 2 ? "bg-emerald-300 text-emerald-900" :
-                        "bg-muted text-muted-foreground"
-                      )}>
+                      <span
+                        className={cn(
+                          'flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium',
+                          index === 0 ? 'bg-emerald-500 text-white' :
+                            index === 1 ? 'bg-emerald-400 text-white' :
+                              index === 2 ? 'bg-emerald-300 text-emerald-900' :
+                                'bg-muted text-muted-foreground'
+                        )}
+                      >
                         {index + 1}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{organ.name}</p>
-                        <p className="text-xs text-muted-foreground">{organ.complaintsCount} denúncias</p>
+                        <p className="text-xs text-muted-foreground">{organ.complaintsCount} denuncias</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-emerald-600">{organ.avgResolutionDays} dias</p>
-                        <p className="text-xs text-muted-foreground">tempo médio</p>
+                        <p className="text-xs text-muted-foreground">tempo medio</p>
                       </div>
                     </div>
                   ))}

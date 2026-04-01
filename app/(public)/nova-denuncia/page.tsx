@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Camera,
 } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -34,7 +35,6 @@ import {
 import { useAuth } from '@/lib/auth-context'
 import { useComplaints } from '@/lib/complaints-store'
 import { CATEGORY_LABELS, NEIGHBORHOODS, RESPONSIBLE_ORGANS, type ComplaintCategory } from '@/lib/types'
-import Link from 'next/link'
 import type { ResolvedLocationDetails } from '@/components/location-picker'
 
 const LocationPicker = dynamic(() => import('@/components/location-picker'), {
@@ -68,14 +68,14 @@ export default function NewComplaintPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      setImage(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+    if (!file) return
+
+    setImage(file)
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string)
     }
+    reader.readAsDataURL(file)
   }
 
   const removeImage = () => {
@@ -108,36 +108,38 @@ export default function NewComplaintPage() {
       return
     }
 
-    if (!latitude || !longitude) {
-      alert('Por favor, selecione a localização do problema no mapa.')
+    if (!latitude || !longitude || !user) {
+      alert('Selecione a localizacao do problema no mapa antes de enviar.')
       return
     }
 
     setIsSubmitting(true)
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      await addComplaint({
+        title,
+        description,
+        category: category as ComplaintCategory,
+        neighborhood,
+        street,
+        referencePoint,
+        responsibleOrgan: responsibleOrgan || 'A definir',
+        imageFile: image,
+        latitude,
+        longitude,
+        userId: user.id,
+      })
 
-    addComplaint({
-      title,
-      description,
-      category: category as ComplaintCategory,
-      neighborhood,
-      street,
-      referencePoint,
-      responsibleOrgan: responsibleOrgan || 'A definir',
-      imageUrl: imagePreview || undefined,
-      latitude,
-      longitude,
-      userId: user?.id || 'anonymous',
-      userName: user?.name || 'Usuário',
-    })
-
-    setIsSubmitting(false)
-    setShowSuccess(true)
-
-    setTimeout(() => {
-      router.push('/minhas-denuncias')
-    }, 2000)
+      setShowSuccess(true)
+      setTimeout(() => {
+        router.push('/minhas-denuncias')
+      }, 1800)
+    } catch (error) {
+      console.error(error)
+      alert('Nao foi possivel enviar a denuncia. Verifique a configuracao do Supabase e tente novamente.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (authLoading) {
@@ -157,10 +159,8 @@ export default function NewComplaintPage() {
           transition={{ duration: 0.5 }}
         >
           <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl font-bold mb-2">Nova Denúncia</h1>
-            <p className="text-muted-foreground">
-              Registre um problema urbano e ajude a melhorar Aracaju
-            </p>
+            <h1 className="font-serif text-3xl font-bold mb-2">Nova Denuncia</h1>
+            <p className="text-muted-foreground">Registre um problema urbano e ajude a melhorar Aracaju.</p>
           </div>
 
           {!isAuthenticated && (
@@ -168,9 +168,9 @@ export default function NewComplaintPage() {
               <CardContent className="p-4 flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-sm">Você precisa estar logado</p>
+                  <p className="font-medium text-sm">Voce precisa estar logado</p>
                   <p className="text-sm text-muted-foreground">
-                    Para fazer uma denúncia, faça{' '}
+                    Para fazer uma denuncia, faca{' '}
                     <Link href="/login?redirect=/nova-denuncia" className="text-primary hover:underline">
                       login
                     </Link>{' '}
@@ -187,13 +187,13 @@ export default function NewComplaintPage() {
 
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-serif text-lg">Informações da Denúncia</CardTitle>
+              <CardTitle className="font-serif text-lg">Informacoes da Denuncia</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <FieldGroup>
                   <Field>
-                    <FieldLabel htmlFor="title">Título da denúncia *</FieldLabel>
+                    <FieldLabel htmlFor="title">Titulo da denuncia *</FieldLabel>
                     <Input
                       id="title"
                       placeholder="Ex: Buraco perigoso na Av. Beira Mar"
@@ -205,10 +205,10 @@ export default function NewComplaintPage() {
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor="description">Descrição detalhada *</FieldLabel>
+                    <FieldLabel htmlFor="description">Descricao detalhada *</FieldLabel>
                     <Textarea
                       id="description"
-                      placeholder="Descreva o problema com o máximo de detalhes possíveis..."
+                      placeholder="Descreva o problema com o maximo de detalhes possivel..."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
                       required
@@ -264,10 +264,10 @@ export default function NewComplaintPage() {
                     </Field>
 
                     <Field>
-                      <FieldLabel htmlFor="referencePoint">Ponto de Referência</FieldLabel>
+                      <FieldLabel htmlFor="referencePoint">Ponto de Referencia</FieldLabel>
                       <Input
                         id="referencePoint"
-                        placeholder="Ex: Próximo ao calçadão"
+                        placeholder="Ex: Proximo ao calcadao"
                         value={referencePoint}
                         onChange={(e) => setReferencePoint(e.target.value)}
                         className="h-11"
@@ -276,10 +276,10 @@ export default function NewComplaintPage() {
                   </div>
 
                   <Field>
-                    <FieldLabel>Órgão Responsável</FieldLabel>
+                    <FieldLabel>Orgao Responsavel</FieldLabel>
                     <Select value={responsibleOrgan} onValueChange={setResponsibleOrgan}>
                       <SelectTrigger className="h-11">
-                        <SelectValue placeholder="Selecione o Órgão (opcional)" />
+                        <SelectValue placeholder="Selecione o orgao (opcional)" />
                       </SelectTrigger>
                       <SelectContent>
                         {RESPONSIBLE_ORGANS.map((organ) => (
@@ -290,12 +290,12 @@ export default function NewComplaintPage() {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Se você souber qual Órgão deve resolver o problema
+                      Se voce souber qual orgao deve resolver o problema.
                     </p>
                   </Field>
 
                   <Field>
-                    <FieldLabel>Localização no Mapa *</FieldLabel>
+                    <FieldLabel>Localizacao no Mapa *</FieldLabel>
                     <LocationPicker
                       onLocationSelect={handleLocationSelect}
                       initialLat={latitude || undefined}
@@ -305,10 +305,10 @@ export default function NewComplaintPage() {
                       <div className="mt-2 space-y-1">
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Localização selecionada com sucesso
+                          Localizacao selecionada com sucesso
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Bairro, rua e ponto de referência serãoo preenchidos automaticamente quando disponíveis.
+                          Bairro, rua e ponto de referencia sao preenchidos automaticamente quando disponiveis.
                         </p>
                       </div>
                     )}
@@ -318,11 +318,7 @@ export default function NewComplaintPage() {
                     <FieldLabel>Foto do Problema</FieldLabel>
                     {imagePreview ? (
                       <div className="relative rounded-lg overflow-hidden border border-border">
-                        <img
-                          src={imagePreview}
-                          alt="Preview"
-                          className="w-full h-48 object-cover"
-                        />
+                        <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover" />
                         <Button
                           type="button"
                           variant="destructive"
@@ -336,15 +332,8 @@ export default function NewComplaintPage() {
                     ) : (
                       <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                         <Camera className="h-8 w-8 text-muted-foreground mb-2" />
-                        <span className="text-sm text-muted-foreground">
-                          Clique para adicionar uma foto
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={handleImageChange}
-                        />
+                        <span className="text-sm text-muted-foreground">Clique para adicionar uma foto</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
                       </label>
                     )}
                   </Field>
@@ -370,7 +359,7 @@ export default function NewComplaintPage() {
                     ) : (
                       <>
                         <Upload className="h-4 w-4 mr-2" />
-                        Enviar Denúncia
+                        Enviar Denuncia
                       </>
                     )}
                   </Button>
@@ -384,9 +373,9 @@ export default function NewComplaintPage() {
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif">Login Necessário</DialogTitle>
+            <DialogTitle className="font-serif">Login Necessario</DialogTitle>
             <DialogDescription>
-              Para fazer uma denúncia, você precisa estar logado na plataforma.
+              Para fazer uma denuncia, voce precisa estar logado na plataforma.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
@@ -413,10 +402,9 @@ export default function NewComplaintPage() {
             <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           </motion.div>
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl">Denúncia Enviada!</DialogTitle>
+            <DialogTitle className="font-serif text-xl">Denuncia Enviada!</DialogTitle>
             <DialogDescription>
-              Sua denúncia foi registrada com sucesso. Você pode acompanhar o status na página
-              {' Minhas Denúncias'}.
+              Sua denuncia foi registrada com sucesso. Voce pode acompanhar o status em Minhas Denuncias.
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

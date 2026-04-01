@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -12,12 +12,12 @@ import { FieldGroup, Field, FieldLabel } from '@/components/ui/field'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/lib/auth-context'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
-  const { login } = useAuth()
-  
+  const { login, authError } = useAuth()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -35,7 +35,7 @@ export default function LoginPage() {
       if (success) {
         router.push(activeTab === 'admin' ? '/admin' : redirect)
       } else {
-        setError('Credenciais inválidas')
+        setError(authError || 'Credenciais inválidas')
       }
     } catch {
       setError('Erro ao fazer login')
@@ -62,9 +62,7 @@ export default function LoginPage() {
             </span>
           </Link>
           <h1 className="font-serif text-2xl font-bold mb-2">Bem-vindo de volta</h1>
-          <p className="text-muted-foreground">
-            Entre na sua conta para continuar
-          </p>
+          <p className="text-muted-foreground">Entre na sua conta para continuar</p>
         </div>
 
         <Card className="border-border/50">
@@ -94,9 +92,6 @@ export default function LoginPage() {
                     <Field>
                       <div className="flex items-center justify-between">
                         <FieldLabel htmlFor="password">Senha</FieldLabel>
-                        <Link href="/recuperar-senha" className="text-xs text-primary hover:underline">
-                          Esqueceu a senha?
-                        </Link>
                       </div>
                       <div className="relative">
                         <Input
@@ -118,9 +113,7 @@ export default function LoginPage() {
                       </div>
                     </Field>
 
-                    {error && (
-                      <p className="text-sm text-destructive">{error}</p>
-                    )}
+                    {(error || authError) && <p className="text-sm text-destructive">{error || authError}</p>}
 
                     <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90" disabled={isLoading}>
                       {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Entrar'}
@@ -167,16 +160,14 @@ export default function LoginPage() {
                       </div>
                     </Field>
 
-                    {error && (
-                      <p className="text-sm text-destructive">{error}</p>
-                    )}
+                    {(error || authError) && <p className="text-sm text-destructive">{error || authError}</p>}
 
                     <Button type="submit" className="w-full h-11 bg-primary hover:bg-primary/90" disabled={isLoading}>
                       {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Entrar como Admin'}
                     </Button>
 
                     <p className="text-xs text-center text-muted-foreground mt-2">
-                      Use admin@aracajuresolve.com para testar o acesso administrativo
+                      Entre com uma conta promovida para admin no Supabase.
                     </p>
                   </FieldGroup>
                 </form>
@@ -193,5 +184,19 @@ export default function LoginPage() {
         </p>
       </motion.div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   )
 }

@@ -14,8 +14,8 @@ import { useAuth } from '@/lib/auth-context'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const { login } = useAuth()
-  
+  const { register, authError } = useAuth()
+
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -50,9 +50,17 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const success = await login(email, password, 'user')
-      if (success) {
+      const result = await register({ name, email, password })
+
+      if (result.success) {
+        if (result.requiresEmailConfirmation) {
+          router.push('/login')
+          return
+        }
+
         router.push('/')
+      } else {
+        setError(result.error || 'Erro ao criar conta')
       }
     } catch {
       setError('Erro ao criar conta')
@@ -79,9 +87,7 @@ export default function RegisterPage() {
             </span>
           </Link>
           <h1 className="font-serif text-2xl font-bold mb-2">Criar sua conta</h1>
-          <p className="text-muted-foreground">
-            Junte-se a milhares de aracajuanos fazendo a diferença
-          </p>
+          <p className="text-muted-foreground">Junte-se à comunidade do Aracaju Resolve</p>
         </div>
 
         <Card className="border-border/50">
@@ -172,31 +178,22 @@ export default function RegisterPage() {
                 </Field>
 
                 <div className="flex items-start gap-2">
-                  <Checkbox 
-                    id="terms" 
+                  <Checkbox
+                    id="terms"
                     checked={acceptTerms}
                     onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
                     className="mt-0.5"
                   />
                   <label htmlFor="terms" className="text-sm text-muted-foreground cursor-pointer">
-                    Li e aceito os{' '}
-                    <Link href="#" className="text-primary hover:underline">
-                      Termos de Uso
-                    </Link>{' '}
-                    e a{' '}
-                    <Link href="#" className="text-primary hover:underline">
-                      Política de Privacidade
-                    </Link>
+                    Li e aceito os termos de uso e a política de privacidade.
                   </label>
                 </div>
 
-                {error && (
-                  <p className="text-sm text-destructive">{error}</p>
-                )}
+                {(error || authError) && <p className="text-sm text-destructive">{error || authError}</p>}
 
-                <Button 
-                  type="submit" 
-                  className="w-full h-11 bg-primary hover:bg-primary/90" 
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-primary hover:bg-primary/90"
                   disabled={isLoading || !acceptTerms || !passwordsMatch || !isValidPassword}
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Criar conta'}

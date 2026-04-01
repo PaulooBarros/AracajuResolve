@@ -42,7 +42,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ComplaintCard } from '@/components/complaint-card'
-import { mockComplaints } from '@/lib/mock-data'
+import { useComplaints } from '@/lib/complaints-store'
 import { 
   CATEGORY_LABELS, 
   STATUS_LABELS, 
@@ -69,6 +69,7 @@ const priorityColors: Record<ComplaintPriority, string> = {
 }
 
 export default function AdminComplaintsPage() {
+  const { complaints } = useComplaints()
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -99,7 +100,7 @@ export default function AdminComplaintsPage() {
   }
 
   const filteredComplaints = useMemo(() => {
-    return mockComplaints.filter((complaint) => {
+    return complaints.filter((complaint) => {
       const matchesSearch = search === '' || 
         complaint.title.toLowerCase().includes(search.toLowerCase()) ||
         complaint.description.toLowerCase().includes(search.toLowerCase())
@@ -111,7 +112,7 @@ export default function AdminComplaintsPage() {
 
       return matchesSearch && matchesCategory && matchesStatus && matchesPriority && matchesNeighborhood
     })
-  }, [search, categoryFilter, statusFilter, priorityFilter, neighborhoodFilter])
+  }, [complaints, search, categoryFilter, statusFilter, priorityFilter, neighborhoodFilter])
 
   return (
     <div className="space-y-6">

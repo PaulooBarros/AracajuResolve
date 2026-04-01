@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { mockComplaints, mockNeighborhoodStats } from '@/lib/mock-data'
+import { useComplaints } from '@/lib/complaints-store'
 import { 
   CATEGORY_LABELS, 
   STATUS_LABELS, 
@@ -32,19 +32,36 @@ const MapComponent = dynamic(() => import('@/components/map-component'), {
 })
 
 export default function AdminMapPage() {
+  const { complaints } = useComplaints()
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedComplaint, setSelectedComplaint] = useState<string | null>(null)
 
   const filteredComplaints = useMemo(() => {
-    return mockComplaints.filter((complaint) => {
+    return complaints.filter((complaint) => {
       const matchesCategory = categoryFilter === 'all' || complaint.category === categoryFilter
       const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter
       return matchesCategory && matchesStatus
     })
-  }, [categoryFilter, statusFilter])
+  }, [categoryFilter, complaints, statusFilter])
 
-  const topNeighborhoods = mockNeighborhoodStats.slice(0, 5)
+  const topNeighborhoods = useMemo(() => {
+    return Object.entries(
+      filteredComplaints.reduce<Record<string, number>>((acc, complaint) => {
+        acc[complaint.neighborhood] = (acc[complaint.neighborhood] || 0) + 1
+        return acc
+      }, {})
+    )
+      .map(([name, complaintsCount]) => ({
+        name,
+        complaintsCount,
+        resolvedCount: filteredComplaints.filter(
+          (complaint) => complaint.neighborhood === name && complaint.status === 'resolvida'
+        ).length,
+      }))
+      .sort((a, b) => b.complaintsCount - a.complaintsCount)
+      .slice(0, 5)
+  }, [filteredComplaints])
 
   return (
     <div className="space-y-6">

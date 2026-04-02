@@ -42,18 +42,19 @@ export default function AdminDashboardPage() {
     const openComplaints = complaints.filter((complaint) => complaint.status === 'aberta').length
     const inProgressComplaints = complaints.filter((complaint) => complaint.status === 'em_andamento').length
     const resolvedComplaints = complaints.filter((complaint) => complaint.status === 'resolvida').length
-    const topNeighborhoods = [...complaints]
-      .reduce<Record<string, number>>((acc, complaint) => {
-        acc[complaint.neighborhood] = (acc[complaint.neighborhood] || 0) + 1
-        return acc
-      }, {})
+    const topNeighborhoods = [...complaints].reduce<Record<string, number>>((acc, complaint) => {
+      acc[complaint.neighborhood] = (acc[complaint.neighborhood] || 0) + 1
+      return acc
+    }, {})
 
     return {
       openComplaints,
       inProgressComplaints,
       resolvedComplaints,
       recentComplaints: complaints.slice(0, 5),
-      criticalComplaints: complaints.filter((complaint) => complaint.priority === 'critica' || complaint.priority === 'alta').slice(0, 3),
+      criticalComplaints: complaints
+        .filter((complaint) => complaint.priority === 'critica' || complaint.priority === 'alta')
+        .slice(0, 3),
       neighborhoods: Object.entries(topNeighborhoods)
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count)
@@ -83,14 +84,14 @@ export default function AdminDashboardPage() {
           <h1 className="font-serif text-2xl font-bold">Visao Geral</h1>
           <p className="text-muted-foreground text-sm">Painel conectado ao Supabase.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+        <div className="flex w-full sm:w-auto items-center gap-2">
+          <Badge variant="secondary" className="w-full justify-center sm:w-auto bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
             {totalUsers} cidadaos e {totalAdmins} admins
           </Badge>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {statCards.map((stat, index) => {
           const Icon = stat.icon
           return (
@@ -118,9 +119,9 @@ export default function AdminDashboardPage() {
         })}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="border-border/50 lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 gap-3">
             <CardTitle className="font-serif text-base font-semibold">Denuncias Recentes</CardTitle>
             <Link href="/admin/denuncias">
               <Button variant="ghost" size="sm" className="text-xs">
@@ -129,30 +130,48 @@ export default function AdminDashboardPage() {
             </Link>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs">Titulo</TableHead>
-                  <TableHead className="text-xs">Bairro</TableHead>
-                  <TableHead className="text-xs">Categoria</TableHead>
-                  <TableHead className="text-xs">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {summary.recentComplaints.map((complaint) => (
-                  <TableRow key={complaint.id}>
-                    <TableCell className="font-medium text-sm max-w-[220px] truncate">{complaint.title}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{complaint.neighborhood}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{CATEGORY_LABELS[complaint.category]}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={cn('text-xs', statusColors[complaint.status])}>
-                        {STATUS_LABELS[complaint.status]}
-                      </Badge>
-                    </TableCell>
+            <div className="hidden md:block overflow-x-auto">
+              <Table className="min-w-[620px]">
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-xs">Titulo</TableHead>
+                    <TableHead className="text-xs">Bairro</TableHead>
+                    <TableHead className="text-xs">Categoria</TableHead>
+                    <TableHead className="text-xs">Status</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {summary.recentComplaints.map((complaint) => (
+                    <TableRow key={complaint.id}>
+                      <TableCell className="font-medium text-sm max-w-[220px] truncate">{complaint.title}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{complaint.neighborhood}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{CATEGORY_LABELS[complaint.category]}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className={cn('text-xs', statusColors[complaint.status])}>
+                          {STATUS_LABELS[complaint.status]}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <div className="space-y-3 p-4 md:hidden">
+              {summary.recentComplaints.map((complaint) => (
+                <div key={complaint.id} className="rounded-lg border border-border/50 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm">{complaint.title}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">{complaint.neighborhood}</p>
+                    </div>
+                    <Badge variant="secondary" className={cn('text-[11px]', statusColors[complaint.status])}>
+                      {STATUS_LABELS[complaint.status]}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">{CATEGORY_LABELS[complaint.category]}</p>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -165,14 +184,14 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             {summary.neighborhoods.map((item, index) => (
-              <div key={item.name} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div key={item.name} className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
                   <span className="flex items-center justify-center w-5 h-5 rounded-full bg-muted text-xs font-medium">
                     {index + 1}
                   </span>
-                  <span className="text-sm">{item.name}</span>
+                  <span className="text-sm truncate">{item.name}</span>
                 </div>
-                <span className="text-xs text-muted-foreground">{item.count}</span>
+                <span className="text-xs text-muted-foreground shrink-0">{item.count}</span>
               </div>
             ))}
             <div className="pt-4 border-t border-border/50 text-sm text-muted-foreground">
@@ -191,14 +210,14 @@ export default function AdminDashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {summary.criticalComplaints.map((complaint) => (
                 <div key={complaint.id} className="p-4 rounded-lg bg-card border border-border/50">
-                  <h4 className="font-medium text-sm line-clamp-1 mb-1">{complaint.title}</h4>
+                  <h4 className="font-medium text-sm line-clamp-2 mb-1">{complaint.title}</h4>
                   <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{complaint.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">{complaint.neighborhood}</span>
-                    <span className="text-xs font-medium">{complaint.confirmations} confirmacoes</span>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground truncate">{complaint.neighborhood}</span>
+                    <span className="text-xs font-medium shrink-0">{complaint.confirmations} confirmacoes</span>
                   </div>
                 </div>
               ))}

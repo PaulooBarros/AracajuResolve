@@ -2,12 +2,10 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { 
-  Search, 
-  Filter, 
-  X, 
-  LayoutGrid, 
+import {
+  Search,
+  X,
+  LayoutGrid,
   List as ListIcon,
   MoreHorizontal,
   Eye,
@@ -15,7 +13,7 @@ import {
   Clock,
   Archive,
   Download,
-  Loader2
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,9 +44,9 @@ import {
 import { ComplaintCard } from '@/components/complaint-card'
 import { toast } from '@/hooks/use-toast'
 import { useComplaints } from '@/lib/complaints-store'
-import { 
-  CATEGORY_LABELS, 
-  STATUS_LABELS, 
+import {
+  CATEGORY_LABELS,
+  STATUS_LABELS,
   PRIORITY_LABELS,
   NEIGHBORHOODS,
   type ComplaintCategory,
@@ -105,10 +103,11 @@ export default function AdminComplaintsPage() {
 
   const filteredComplaints = useMemo(() => {
     return complaints.filter((complaint) => {
-      const matchesSearch = search === '' || 
+      const matchesSearch =
+        search === '' ||
         complaint.title.toLowerCase().includes(search.toLowerCase()) ||
         complaint.description.toLowerCase().includes(search.toLowerCase())
-      
+
       const matchesCategory = categoryFilter === 'all' || complaint.category === categoryFilter
       const matchesStatus = statusFilter === 'all' || complaint.status === statusFilter
       const matchesPriority = priorityFilter === 'all' || complaint.priority === priorityFilter
@@ -125,13 +124,13 @@ export default function AdminComplaintsPage() {
       await updateComplaint(complaintId, { status })
       toast({
         title: 'Status atualizado',
-        description: `A denúncia foi marcada como ${STATUS_LABELS[status].toLowerCase()}.`,
+        description: `A denuncia foi marcada como ${STATUS_LABELS[status].toLowerCase()}.`,
       })
     } catch (error) {
       console.error(error)
       toast({
         title: 'Erro ao atualizar',
-        description: 'Não foi possível atualizar o status da denúncia.',
+        description: 'Nao foi possivel atualizar o status da denuncia.',
         variant: 'destructive',
       })
     } finally {
@@ -141,40 +140,34 @@ export default function AdminComplaintsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-bold">Gestão de Denúncias</h1>
-          <p className="text-muted-foreground text-sm">
-            Gerencie e acompanhe todas as denúncias do sistema
-          </p>
+          <h1 className="font-serif text-2xl font-bold">Gestao de Denuncias</h1>
+          <p className="text-muted-foreground text-sm">Gerencie e acompanhe todas as denuncias do sistema</p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="w-full sm:w-auto gap-2">
           <Download className="h-4 w-4" />
           Exportar
         </Button>
       </div>
 
-      {/* Filters */}
       <Card className="border-border/50">
         <CardContent className="p-4">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              {/* Search */}
+            <div className="flex flex-col xl:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Buscar denúncias..."
+                  placeholder="Buscar denuncias..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10 h-10"
                 />
               </div>
 
-              {/* Filters */}
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:flex xl:flex-wrap gap-2 w-full xl:w-auto">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-[150px] h-10">
+                  <SelectTrigger className="w-full xl:w-[150px] h-10">
                     <SelectValue placeholder="Categoria" />
                   </SelectTrigger>
                   <SelectContent>
@@ -186,7 +179,7 @@ export default function AdminComplaintsPage() {
                 </Select>
 
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[140px] h-10">
+                  <SelectTrigger className="w-full xl:w-[140px] h-10">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -198,7 +191,7 @@ export default function AdminComplaintsPage() {
                 </Select>
 
                 <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                  <SelectTrigger className="w-[130px] h-10">
+                  <SelectTrigger className="w-full xl:w-[130px] h-10">
                     <SelectValue placeholder="Prioridade" />
                   </SelectTrigger>
                   <SelectContent>
@@ -210,7 +203,7 @@ export default function AdminComplaintsPage() {
                 </Select>
 
                 <Select value={neighborhoodFilter} onValueChange={setNeighborhoodFilter}>
-                  <SelectTrigger className="w-[140px] h-10">
+                  <SelectTrigger className="w-full xl:w-[140px] h-10">
                     <SelectValue placeholder="Bairro" />
                   </SelectTrigger>
                   <SelectContent>
@@ -221,12 +214,11 @@ export default function AdminComplaintsPage() {
                   </SelectContent>
                 </Select>
 
-                {/* View Mode Toggle */}
                 <div className="flex border border-border rounded-lg overflow-hidden">
                   <Button
                     variant={viewMode === 'table' ? 'secondary' : 'ghost'}
                     size="icon"
-                    className="rounded-none h-10 w-10"
+                    className="rounded-none h-10 flex-1 xl:w-10"
                     onClick={() => setViewMode('table')}
                   >
                     <ListIcon className="h-4 w-4" />
@@ -234,7 +226,7 @@ export default function AdminComplaintsPage() {
                   <Button
                     variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
                     size="icon"
-                    className="rounded-none h-10 w-10"
+                    className="rounded-none h-10 flex-1 xl:w-10"
                     onClick={() => setViewMode('cards')}
                   >
                     <LayoutGrid className="h-4 w-4" />
@@ -243,21 +235,13 @@ export default function AdminComplaintsPage() {
               </div>
             </div>
 
-            {/* Active Filters */}
             {activeFilters.length > 0 && (
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-muted-foreground">Filtros ativos:</span>
                 {activeFilters.map((filter) => (
-                  <Badge 
-                    key={filter.key} 
-                    variant="secondary" 
-                    className="gap-1 pr-1"
-                  >
+                  <Badge key={filter.key} variant="secondary" className="gap-1 pr-1">
                     {filter.label}
-                    <button 
-                      onClick={() => clearFilter(filter.key)}
-                      className="ml-1 hover:bg-muted rounded-full p-0.5"
-                    >
+                    <button onClick={() => clearFilter(filter.key)} className="ml-1 hover:bg-muted rounded-full p-0.5">
                       <X className="h-3 w-3" />
                     </button>
                   </Badge>
@@ -271,125 +255,171 @@ export default function AdminComplaintsPage() {
         </CardContent>
       </Card>
 
-      {/* Results */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {filteredComplaints.length} denúncia{filteredComplaints.length !== 1 ? 's' : ''} encontrada{filteredComplaints.length !== 1 ? 's' : ''}
+          {filteredComplaints.length} denuncia{filteredComplaints.length !== 1 ? 's' : ''} encontrada{filteredComplaints.length !== 1 ? 's' : ''}
         </p>
       </div>
 
-      {/* Content */}
       {viewMode === 'table' ? (
         <Card className="border-border/50">
-          <Table>
-            <TableHeader>
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="text-xs">Título</TableHead>
-                <TableHead className="text-xs">Bairro</TableHead>
-                <TableHead className="text-xs">Categoria</TableHead>
-                <TableHead className="text-xs">Status</TableHead>
-                <TableHead className="text-xs">Prioridade</TableHead>
-                <TableHead className="text-xs">Confirmações</TableHead>
-                <TableHead className="text-xs">Data</TableHead>
-                <TableHead className="text-xs text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredComplaints.map((complaint) => (
-                <TableRow key={complaint.id}>
-                  <TableCell className="font-medium text-sm max-w-[200px] truncate">
-                    {complaint.title}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {complaint.neighborhood}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+          <div className="hidden lg:block overflow-x-auto">
+            <Table className="min-w-[900px]">
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="text-xs">Titulo</TableHead>
+                  <TableHead className="text-xs">Bairro</TableHead>
+                  <TableHead className="text-xs">Categoria</TableHead>
+                  <TableHead className="text-xs">Status</TableHead>
+                  <TableHead className="text-xs">Prioridade</TableHead>
+                  <TableHead className="text-xs">Confirmacoes</TableHead>
+                  <TableHead className="text-xs">Data</TableHead>
+                  <TableHead className="text-xs text-right">Acoes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredComplaints.map((complaint) => (
+                  <TableRow key={complaint.id}>
+                    <TableCell className="font-medium text-sm max-w-[200px] truncate">{complaint.title}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{complaint.neighborhood}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{CATEGORY_LABELS[complaint.category]}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={cn('text-xs', statusColors[complaint.status])}>
+                        {STATUS_LABELS[complaint.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" className={cn('text-xs', priorityColors[complaint.priority])}>
+                        {PRIORITY_LABELS[complaint.priority]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{complaint.confirmations}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {new Intl.DateTimeFormat('pt-BR', {
+                        day: '2-digit',
+                        month: 'short',
+                      }).format(complaint.createdAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <ComplaintActions
+                        complaintId={complaint.id}
+                        complaintStatus={complaint.status}
+                        updatingComplaintId={updatingComplaintId}
+                        onStatusUpdate={handleStatusUpdate}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="space-y-4 p-4 lg:hidden">
+            {filteredComplaints.map((complaint) => (
+              <div key={complaint.id} className="rounded-lg border border-border/50 p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-sm">{complaint.title}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">{complaint.neighborhood}</p>
+                  </div>
+                  <ComplaintActions
+                    complaintId={complaint.id}
+                    complaintStatus={complaint.status}
+                    updatingComplaintId={updatingComplaintId}
+                    onStatusUpdate={handleStatusUpdate}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className={cn('text-xs', statusColors[complaint.status])}>
+                    {STATUS_LABELS[complaint.status]}
+                  </Badge>
+                  <Badge variant="secondary" className={cn('text-xs', priorityColors[complaint.priority])}>
+                    {PRIORITY_LABELS[complaint.priority]}
+                  </Badge>
+                  <Badge variant="secondary" className="text-xs">
                     {CATEGORY_LABELS[complaint.category]}
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="secondary" 
-                      className={cn('text-xs', statusColors[complaint.status])}
-                    >
-                      {STATUS_LABELS[complaint.status]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant="secondary" 
-                      className={cn('text-xs', priorityColors[complaint.priority])}
-                    >
-                      {PRIORITY_LABELS[complaint.priority]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {complaint.confirmations}
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                  <span>{complaint.confirmations} confirmacoes</span>
+                  <span>
                     {new Intl.DateTimeFormat('pt-BR', {
                       day: '2-digit',
                       month: 'short',
                     }).format(complaint.createdAt)}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={updatingComplaintId === complaint.id}>
-                          {updatingComplaintId === complaint.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <MoreHorizontal className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem asChild className="gap-2">
-                          <Link href={`/denuncia/${complaint.id}`}>
-                            <Eye className="h-4 w-4" />
-                            Ver detalhes
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="gap-2"
-                          onClick={() => handleStatusUpdate(complaint.id, 'em_andamento')}
-                          disabled={complaint.status === 'em_andamento' || updatingComplaintId === complaint.id}
-                        >
-                          <Clock className="h-4 w-4" />
-                          Marcar em andamento
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="gap-2 text-emerald-600"
-                          onClick={() => handleStatusUpdate(complaint.id, 'resolvida')}
-                          disabled={complaint.status === 'resolvida' || updatingComplaintId === complaint.id}
-                        >
-                          <CheckCircle2 className="h-4 w-4" />
-                          Marcar resolvida
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="gap-2 text-muted-foreground"
-                          onClick={() => handleStatusUpdate(complaint.id, 'arquivada')}
-                          disabled={complaint.status === 'arquivada' || updatingComplaintId === complaint.id}
-                        >
-                          <Archive className="h-4 w-4" />
-                          Arquivar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </Card>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredComplaints.map((complaint, index) => (
             <ComplaintCard key={complaint.id} complaint={complaint} index={index} />
           ))}
         </div>
       )}
     </div>
+  )
+}
+
+function ComplaintActions({
+  complaintId,
+  complaintStatus,
+  updatingComplaintId,
+  onStatusUpdate,
+}: {
+  complaintId: string
+  complaintStatus: ComplaintStatus
+  updatingComplaintId: string | null
+  onStatusUpdate: (complaintId: string, status: ComplaintStatus) => Promise<void>
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8" disabled={updatingComplaintId === complaintId}>
+          {updatingComplaintId === complaintId ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <MoreHorizontal className="h-4 w-4" />
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild className="gap-2">
+          <Link href={`/denuncia/${complaintId}`}>
+            <Eye className="h-4 w-4" />
+            Ver detalhes
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="gap-2"
+          onClick={() => onStatusUpdate(complaintId, 'em_andamento')}
+          disabled={complaintStatus === 'em_andamento' || updatingComplaintId === complaintId}
+        >
+          <Clock className="h-4 w-4" />
+          Marcar em andamento
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="gap-2 text-emerald-600"
+          onClick={() => onStatusUpdate(complaintId, 'resolvida')}
+          disabled={complaintStatus === 'resolvida' || updatingComplaintId === complaintId}
+        >
+          <CheckCircle2 className="h-4 w-4" />
+          Marcar resolvida
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="gap-2 text-muted-foreground"
+          onClick={() => onStatusUpdate(complaintId, 'arquivada')}
+          disabled={complaintStatus === 'arquivada' || updatingComplaintId === complaintId}
+        >
+          <Archive className="h-4 w-4" />
+          Arquivar
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

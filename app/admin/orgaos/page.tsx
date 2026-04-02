@@ -110,18 +110,18 @@ export default function AdminOrgaosPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-bold">Órgãos responsáveis</h1>
+          <h1 className="font-serif text-2xl font-bold">Orgaos responsaveis</h1>
           <p className="text-muted-foreground text-sm">
-            Visão consolidada dos órgãos e secretarias ligados às denúncias reais
+            Visao consolidada dos orgaos e secretarias ligados as denuncias reais
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-2">
+        <Button className="w-full sm:w-auto bg-primary hover:bg-primary/90 gap-2">
           <Plus className="h-4 w-4" />
           Novo orgao
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3 }}>
           <Card className="border-border/50">
             <CardContent className="p-6">
@@ -131,19 +131,14 @@ export default function AdminOrgaosPage() {
                 </div>
                 <div>
                   <p className="font-serif text-3xl font-bold">{organs.length}</p>
-                  <p className="text-sm text-muted-foreground">Órgãos identificados</p>
+                  <p className="text-sm text-muted-foreground">Orgaos identificados</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        <motion.div
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-          transition={{ duration: 0.3, delay: 0.05 }}
-        >
+        <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3, delay: 0.05 }}>
           <Card className="border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -154,19 +149,14 @@ export default function AdminOrgaosPage() {
                   <p className="font-serif text-3xl font-bold">
                     {totalComplaints > 0 ? Math.round((totalResolved / totalComplaints) * 100) : 0}%
                   </p>
-                  <p className="text-sm text-muted-foreground">Taxa de resolução</p>
+                  <p className="text-sm text-muted-foreground">Taxa de resolucao</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
-        <motion.div
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
+        <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3, delay: 0.1 }}>
           <Card className="border-border/50">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
@@ -175,7 +165,7 @@ export default function AdminOrgaosPage() {
                 </div>
                 <div>
                   <p className="font-serif text-3xl font-bold">{avgResolution} dias</p>
-                  <p className="text-sm text-muted-foreground">Tempo médio de resolução</p>
+                  <p className="text-sm text-muted-foreground">Tempo medio de resolucao</p>
                 </div>
               </div>
             </CardContent>
@@ -183,120 +173,135 @@ export default function AdminOrgaosPage() {
         </motion.div>
       </div>
 
-      <motion.div
-        variants={fadeInUp}
-        initial="initial"
-        animate="animate"
-        transition={{ duration: 0.3, delay: 0.15 }}
-      >
+      <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3, delay: 0.15 }}>
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="font-serif text-base font-semibold">Lista de órgãos</CardTitle>
+            <CardTitle className="font-serif text-base font-semibold">Lista de orgaos</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs">Órgão</TableHead>
-                  <TableHead className="text-xs">Categorias</TableHead>
-                  <TableHead className="text-xs">Denúncias</TableHead>
-                  <TableHead className="text-xs">Resolvidas</TableHead>
-                  <TableHead className="text-xs">Taxa</TableHead>
-                  <TableHead className="text-xs">Tempo medio</TableHead>
-                  <TableHead className="text-xs text-right">Acoes</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {organs.map((organ) => {
-                  const rate = organ.complaintsCount > 0
-                    ? Math.round((organ.resolvedCount / organ.complaintsCount) * 100)
-                    : 0
+            <div className="hidden lg:block overflow-x-auto">
+              <Table className="min-w-[920px]">
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-xs">Orgao</TableHead>
+                    <TableHead className="text-xs">Categorias</TableHead>
+                    <TableHead className="text-xs">Denuncias</TableHead>
+                    <TableHead className="text-xs">Resolvidas</TableHead>
+                    <TableHead className="text-xs">Taxa</TableHead>
+                    <TableHead className="text-xs">Tempo medio</TableHead>
+                    <TableHead className="text-xs text-right">Acoes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {organs.map((organ) => {
+                    const rate = organ.complaintsCount > 0
+                      ? Math.round((organ.resolvedCount / organ.complaintsCount) * 100)
+                      : 0
 
-                  return (
-                    <TableRow key={organ.id}>
-                      <TableCell className="font-medium text-sm">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-muted">
-                            <Building2 className="h-4 w-4 text-muted-foreground" />
+                    return (
+                      <TableRow key={organ.id}>
+                        <TableCell className="font-medium text-sm">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-lg bg-muted">
+                              <Building2 className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                            <span className="max-w-[220px] truncate">{organ.name}</span>
                           </div>
-                          <span className="max-w-[200px] truncate">{organ.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {organ.categories.slice(0, 2).map((category) => (
-                            <Badge key={category} variant="secondary" className="text-xs">
-                              {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}
-                            </Badge>
-                          ))}
-                          {organ.categories.length > 2 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{organ.categories.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">{organ.complaintsCount}</TableCell>
-                      <TableCell className="text-sm text-emerald-600">{organ.resolvedCount}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress value={rate} className="w-16 h-1.5" />
-                          <span className="text-xs text-muted-foreground">{rate}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        <span
-                          className={cn(
-                            organ.avgResolutionDays <= 5 ? 'text-emerald-600' :
-                              organ.avgResolutionDays <= 10 ? 'text-amber-600' : 'text-red-600'
-                          )}
-                        >
-                          {organ.avgResolutionDays} dias
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2">
-                              <FileText className="h-4 w-4" />
-                              Ver denúncias
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2">
-                              <Edit className="h-4 w-4" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem className="gap-2 text-destructive">
-                              <Trash2 className="h-4 w-4" />
-                              Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {organ.categories.slice(0, 2).map((category) => (
+                              <Badge key={category} variant="secondary" className="text-xs">
+                                {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}
+                              </Badge>
+                            ))}
+                            {organ.categories.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">
+                                +{organ.categories.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">{organ.complaintsCount}</TableCell>
+                        <TableCell className="text-sm text-emerald-600">{organ.resolvedCount}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress value={rate} className="w-16 h-1.5" />
+                            <span className="text-xs text-muted-foreground">{rate}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          <span
+                            className={cn(
+                              organ.avgResolutionDays <= 5
+                                ? 'text-emerald-600'
+                                : organ.avgResolutionDays <= 10
+                                  ? 'text-amber-600'
+                                  : 'text-red-600'
+                            )}
+                          >
+                            {organ.avgResolutionDays} dias
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <OrganActions />
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="space-y-4 p-4 lg:hidden">
+              {organs.map((organ) => {
+                const rate = organ.complaintsCount > 0
+                  ? Math.round((organ.resolvedCount / organ.complaintsCount) * 100)
+                  : 0
+
+                return (
+                  <div key={organ.id} className="rounded-lg border border-border/50 p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm">{organ.name}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">{organ.complaintsCount} denuncias</p>
+                      </div>
+                      <OrganActions />
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {organ.categories.slice(0, 3).map((category) => (
+                        <Badge key={category} variant="secondary" className="text-xs">
+                          {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-lg bg-muted/40 p-3">
+                        <p className="text-xs text-muted-foreground">Resolvidas</p>
+                        <p className="mt-1 font-medium text-emerald-600">{organ.resolvedCount}</p>
+                      </div>
+                      <div className="rounded-lg bg-muted/40 p-3">
+                        <p className="text-xs text-muted-foreground">Tempo medio</p>
+                        <p className="mt-1 font-medium">{organ.avgResolutionDays} dias</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Progress value={rate} className="flex-1 h-1.5" />
+                      <span className="text-xs text-muted-foreground">{rate}%</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </CardContent>
         </Card>
       </motion.div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <motion.div
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-          transition={{ duration: 0.3, delay: 0.2 }}
-        >
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3, delay: 0.2 }}>
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-serif text-base font-semibold">Ranking por eficiência</CardTitle>
+              <CardTitle className="font-serif text-base font-semibold">Ranking por eficiencia</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -316,11 +321,14 @@ export default function AdminOrgaosPage() {
                       <div key={organ.id} className="flex items-center gap-4">
                         <span
                           className={cn(
-                            'flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium',
-                            index === 0 ? 'bg-amber-500 text-white' :
-                              index === 1 ? 'bg-slate-400 text-white' :
-                                index === 2 ? 'bg-amber-700 text-white' :
-                                  'bg-muted text-muted-foreground'
+                            'flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium shrink-0',
+                            index === 0
+                              ? 'bg-amber-500 text-white'
+                              : index === 1
+                                ? 'bg-slate-400 text-white'
+                                : index === 2
+                                  ? 'bg-amber-700 text-white'
+                                  : 'bg-muted text-muted-foreground'
                           )}
                         >
                           {index + 1}
@@ -340,12 +348,7 @@ export default function AdminOrgaosPage() {
           </Card>
         </motion.div>
 
-        <motion.div
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-          transition={{ duration: 0.3, delay: 0.25 }}
-        >
+        <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3, delay: 0.25 }}>
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="font-serif text-base font-semibold">Ranking por velocidade</CardTitle>
@@ -359,22 +362,25 @@ export default function AdminOrgaosPage() {
                     <div key={organ.id} className="flex items-center gap-4">
                       <span
                         className={cn(
-                          'flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium',
-                          index === 0 ? 'bg-emerald-500 text-white' :
-                            index === 1 ? 'bg-emerald-400 text-white' :
-                              index === 2 ? 'bg-emerald-300 text-emerald-900' :
-                                'bg-muted text-muted-foreground'
+                          'flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium shrink-0',
+                          index === 0
+                            ? 'bg-emerald-500 text-white'
+                            : index === 1
+                              ? 'bg-emerald-400 text-white'
+                              : index === 2
+                                ? 'bg-emerald-300 text-emerald-900'
+                                : 'bg-muted text-muted-foreground'
                         )}
                       >
                         {index + 1}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{organ.name}</p>
-                        <p className="text-xs text-muted-foreground">{organ.complaintsCount} denúncias</p>
+                        <p className="text-xs text-muted-foreground">{organ.complaintsCount} denuncias</p>
                       </div>
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         <p className="text-sm font-semibold text-emerald-600">{organ.avgResolutionDays} dias</p>
-                        <p className="text-xs text-muted-foreground">tempo médio</p>
+                        <p className="text-xs text-muted-foreground">tempo medio</p>
                       </div>
                     </div>
                   ))}
@@ -384,5 +390,32 @@ export default function AdminOrgaosPage() {
         </motion.div>
       </div>
     </div>
+  )
+}
+
+function OrganActions() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem className="gap-2">
+          <FileText className="h-4 w-4" />
+          Ver denuncias
+        </DropdownMenuItem>
+        <DropdownMenuItem className="gap-2">
+          <Edit className="h-4 w-4" />
+          Editar
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="gap-2 text-destructive">
+          <Trash2 className="h-4 w-4" />
+          Excluir
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

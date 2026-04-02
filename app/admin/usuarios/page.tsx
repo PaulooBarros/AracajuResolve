@@ -8,7 +8,6 @@ import {
   Shield,
   FileText,
   Search,
-  Mail,
   Loader2,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -70,7 +69,7 @@ export default function AdminUsersPage() {
         <p className="text-muted-foreground text-sm">Lista real de perfis cadastrados no Supabase.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         <motion.div variants={fadeInUp} initial="initial" animate="animate" transition={{ duration: 0.3 }}>
           <Card className="border-border/50">
             <CardContent className="p-6 flex items-center gap-4">
@@ -127,7 +126,7 @@ export default function AdminUsersPage() {
               />
             </div>
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-[160px] h-10">
+              <SelectTrigger className="w-full sm:w-[160px] h-10">
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
@@ -141,69 +140,111 @@ export default function AdminUsersPage() {
       </Card>
 
       <Card className="border-border/50">
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="text-xs">Usuario</TableHead>
-              <TableHead className="text-xs">E-mail</TableHead>
-              <TableHead className="text-xs">Tipo</TableHead>
-              <TableHead className="text-xs">Denuncias</TableHead>
-              <TableHead className="text-xs">Cadastro</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredUsers.map((user) => (
-              <TableRow key={user.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback
-                        className={cn(
-                          user.role === 'admin' ? 'bg-violet-500/10 text-violet-500' : 'bg-primary/10 text-primary'
-                        )}
-                      >
-                        {user.name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium text-sm">{user.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5" />
-                    {user.email}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
+        <div className="hidden md:block overflow-x-auto">
+          <Table className="min-w-[720px]">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="text-xs">Usuario</TableHead>
+                <TableHead className="text-xs">E-mail</TableHead>
+                <TableHead className="text-xs">Tipo</TableHead>
+                <TableHead className="text-xs">Denuncias</TableHead>
+                <TableHead className="text-xs">Cadastro</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback
+                          className={cn(
+                            user.role === 'admin' ? 'bg-violet-500/10 text-violet-500' : 'bg-primary/10 text-primary'
+                          )}
+                        >
+                          {user.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium text-sm">{user.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{user.email}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        'text-xs',
+                        user.role === 'admin'
+                          ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400'
+                          : 'bg-primary/10 text-primary'
+                      )}
+                    >
+                      {user.role === 'admin' ? 'Admin' : 'Cidadao'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                      {user.complaintsCount}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {new Intl.DateTimeFormat('pt-BR', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric',
+                    }).format(user.createdAt)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="space-y-4 p-4 md:hidden">
+          {filteredUsers.map((user) => (
+            <div key={user.id} className="rounded-lg border border-border/50 p-4">
+              <div className="flex items-start gap-3">
+                <Avatar className="h-10 w-10">
+                  <AvatarFallback
                     className={cn(
-                      'text-xs',
-                      user.role === 'admin'
-                        ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400'
-                        : 'bg-primary/10 text-primary'
+                      user.role === 'admin' ? 'bg-violet-500/10 text-violet-500' : 'bg-primary/10 text-primary'
                     )}
                   >
-                    {user.role === 'admin' ? 'Admin' : 'Cidadao'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
-                    {user.complaintsCount}
+                    {user.name.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-medium text-sm">{user.name}</p>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        'text-[11px]',
+                        user.role === 'admin'
+                          ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400'
+                          : 'bg-primary/10 text-primary'
+                      )}
+                    >
+                      {user.role === 'admin' ? 'Admin' : 'Cidadao'}
+                    </Badge>
                   </div>
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {new Intl.DateTimeFormat('pt-BR', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  }).format(user.createdAt)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  <p className="mt-1 text-xs text-muted-foreground break-all">{user.email}</p>
+                  <div className="mt-3 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                    <span>{user.complaintsCount} denuncias</span>
+                    <span>
+                      {new Intl.DateTimeFormat('pt-BR', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                      }).format(user.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </Card>
 
       <p className="text-sm text-muted-foreground">

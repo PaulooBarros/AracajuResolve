@@ -111,8 +111,8 @@ export default function NewComplaintPage() {
 
     if (!latitude || !longitude || !user) {
       toast({
-        title: 'Localizacao obrigatoria',
-        description: 'Selecione a localizacao do problema no mapa antes de enviar.',
+        title: 'Localização obrigatória',
+        description: 'Selecione a localização do problema no mapa antes de enviar.',
         variant: 'destructive',
       })
       return
@@ -142,8 +142,8 @@ export default function NewComplaintPage() {
     } catch (error) {
       console.error(error)
       toast({
-        title: 'Erro ao enviar denuncia',
-        description: 'Nao foi possivel enviar a denuncia. Verifique a configuracao do Supabase e tente novamente.',
+        title: 'Erro ao enviar denúncia',
+        description: 'Não foi possível enviar a denúncia. Verifique a configuração do Supabase e tente novamente.',
         variant: 'destructive',
       })
     } finally {
@@ -168,7 +168,7 @@ export default function NewComplaintPage() {
           transition={{ duration: 0.5 }}
         >
           <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl font-bold mb-2">Nova Denuncia</h1>
+            <h1 className="font-serif text-3xl font-bold mb-2">Nova DenÚncia</h1>
             <p className="text-muted-foreground">Registre um problema urbano e ajude a melhorar Aracaju.</p>
           </div>
 
@@ -177,9 +177,9 @@ export default function NewComplaintPage() {
               <CardContent className="p-4 flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-sm">Voce precisa estar logado</p>
+                  <p className="font-medium text-sm">Você precisa estar logado</p>
                   <p className="text-sm text-muted-foreground">
-                    Para fazer uma denuncia, faca{' '}
+                    Para fazer uma denúncia, faça{' '}
                     <Link href="/login?redirect=/nova-denuncia" className="text-primary hover:underline">
                       login
                     </Link>{' '}
@@ -196,13 +196,13 @@ export default function NewComplaintPage() {
 
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-serif text-lg">Informacoes da Denuncia</CardTitle>
+              <CardTitle className="font-serif text-lg">Informações da Denúncia</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit}>
                 <FieldGroup>
                   <Field>
-                    <FieldLabel htmlFor="title">Titulo da denuncia *</FieldLabel>
+                    <FieldLabel htmlFor="title">Título da denúncia *</FieldLabel>
                     <Input
                       id="title"
                       placeholder="Ex: Buraco perigoso na Av. Beira Mar"
@@ -214,7 +214,7 @@ export default function NewComplaintPage() {
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor="description">Descricao detalhada *</FieldLabel>
+                    <FieldLabel htmlFor="description">Descrição detalhada *</FieldLabel>
                     <Textarea
                       id="description"
                       placeholder="Descreva o problema com o maximo de detalhes possivel..."
@@ -273,10 +273,10 @@ export default function NewComplaintPage() {
                     </Field>
 
                     <Field>
-                      <FieldLabel htmlFor="referencePoint">Ponto de Referencia</FieldLabel>
+                      <FieldLabel htmlFor="referencePoint">Ponto de Referência</FieldLabel>
                       <Input
                         id="referencePoint"
-                        placeholder="Ex: Proximo ao calcadao"
+                        placeholder="Ex: Próximo ao calçadão"
                         value={referencePoint}
                         onChange={(e) => setReferencePoint(e.target.value)}
                         className="h-11"
@@ -288,7 +288,7 @@ export default function NewComplaintPage() {
                     <FieldLabel>Orgao Responsavel</FieldLabel>
                     <Select value={responsibleOrgan} onValueChange={setResponsibleOrgan}>
                       <SelectTrigger className="h-11">
-                        <SelectValue placeholder="Selecione o orgao (opcional)" />
+                        <SelectValue placeholder="Selecione o órgão (opcional)" />
                       </SelectTrigger>
                       <SelectContent>
                         {RESPONSIBLE_ORGANS.map((organ) => (
@@ -299,12 +299,12 @@ export default function NewComplaintPage() {
                       </SelectContent>
                     </Select>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Se voce souber qual orgao deve resolver o problema.
+                      Se você souber qual orgão deve resolver o problema.
                     </p>
                   </Field>
 
                   <Field>
-                    <FieldLabel>Localizacao no Mapa *</FieldLabel>
+                    <FieldLabel>Localização no Mapa *</FieldLabel>
                     <LocationPicker
                       onLocationSelect={handleLocationSelect}
                       initialLat={latitude || undefined}
@@ -314,10 +314,10 @@ export default function NewComplaintPage() {
                       <div className="mt-2 space-y-1">
                         <p className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          Localizacao selecionada com sucesso
+                          Localização selecionada com sucesso
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Bairro, rua e ponto de referencia sao preenchidos automaticamente quando disponiveis.
+                          Bairro, rua e ponto de referência são preenchidos automaticamente quando disponíveis.
                         </p>
                       </div>
                     )}
@@ -368,7 +368,7 @@ export default function NewComplaintPage() {
                     ) : (
                       <>
                         <Upload className="h-4 w-4 mr-2" />
-                        Enviar Denuncia
+                        Enviar Denúncia
                       </>
                     )}
                   </Button>
@@ -382,9 +382,9 @@ export default function NewComplaintPage() {
       <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-serif">Login Necessario</DialogTitle>
+            <DialogTitle className="font-serif">Login Necessário</DialogTitle>
             <DialogDescription>
-              Para fazer uma denuncia, voce precisa estar logado na plataforma.
+              Para fazer uma denúncia, você precisa estar logado na plataforma.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col sm:flex-row gap-3 mt-4">
@@ -411,9 +411,9 @@ export default function NewComplaintPage() {
             <CheckCircle2 className="h-8 w-8 text-emerald-500" />
           </motion.div>
           <DialogHeader>
-            <DialogTitle className="font-serif text-xl">Denuncia Enviada!</DialogTitle>
+            <DialogTitle className="font-serif text-xl">Denúncia Enviada!</DialogTitle>
             <DialogDescription>
-              Sua denuncia foi registrada com sucesso. Voce pode acompanhar o status em Minhas Denuncias.
+              Sua denúncia foi registrada com sucesso. Você pode acompanhar o status em Minhas Denuncias.
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

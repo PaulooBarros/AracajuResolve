@@ -155,11 +155,11 @@ export default function HomePage() {
 
               <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-balance">
                 Transforme problemas da cidade em{' '}
-                <span className="text-primary">solucoes visiveis</span>
+                <span className="text-primary">soluções visíveis</span>
               </h1>
 
               <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 text-pretty">
-                Registre denuncias, acompanhe a resolucao e ajude a priorizar o que realmente
+                Registre denúncias, acompanhe a resolução e ajude a priorizar o que realmente
                 importa para Aracaju.
               </p>
 
@@ -177,7 +177,7 @@ export default function HomePage() {
                     className="w-full sm:w-auto gap-2 h-12 px-8 border-primary/30 hover:bg-primary/5"
                   >
                     <FileText className="h-5 w-5" />
-                    Fazer denuncia
+                    Fazer denúncia
                   </Button>
                 </Link>
               </div>
@@ -190,11 +190,11 @@ export default function HomePage() {
               >
                 <motion.div variants={fadeInUp} className="text-center lg:text-left">
                   <p className="font-serif text-3xl font-bold text-primary">{stats.totalComplaints}</p>
-                  <p className="text-sm text-muted-foreground">Denuncias registradas</p>
+                  <p className="text-sm text-muted-foreground">Denúncias registradas</p>
                 </motion.div>
                 <motion.div variants={fadeInUp} className="text-center lg:text-left">
                   <p className="font-serif text-3xl font-bold text-primary">{stats.resolvedComplaints}</p>
-                  <p className="text-sm text-muted-foreground">Resolvidas</p>
+                  <p className="text-sm text-muted-foreground">Denúncias resolvidas</p>
                 </motion.div>
                 <motion.div variants={fadeInUp} className="text-center lg:text-left">
                   <p className="font-serif text-3xl font-bold text-primary">{stats.totalNeighborhoods}</p>
@@ -215,7 +215,7 @@ export default function HomePage() {
                     <MapComponent complaints={featuredComplaints} initialZoom={12} interactive={false} />
                   ) : (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                      {isLoading ? 'Carregando ocorrencias...' : 'As novas denuncias vao aparecer aqui no mapa.'}
+                      {isLoading ? 'Carregando ocorrências...' : 'As novas denúncias vão aparecer aqui no mapa.'}
                     </div>
                   )}
 
@@ -231,16 +231,16 @@ export default function HomePage() {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20">
-                            {featuredComplaint ? featuredComplaint.status.replace('_', ' ') : 'Sem ocorrencias'}
+                            {featuredComplaint ? featuredComplaint.status.replace('_', ' ') : 'Sem denúncias'}
                           </Badge>
                           <span className="text-xs text-muted-foreground">
                             {featuredComplaint
                               ? featuredComplaint.createdAt.toLocaleDateString('pt-BR')
-                              : 'Envie a primeira denuncia'}
+                              : 'Envie a primeira denúncia'}
                           </span>
                         </div>
                         <p className="font-medium text-sm line-clamp-1">
-                          {featuredComplaint?.title || 'As denuncias publicadas passam a aparecer aqui.'}
+                          {featuredComplaint?.title || 'As denúncias publicadas passam a aparecer aqui.'}
                         </p>
                         <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                           <MapPin className="h-3 w-3" />
@@ -270,7 +270,7 @@ export default function HomePage() {
           >
             <div>
               <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-2">Problemas acontecendo agora</h2>
-              <p className="text-muted-foreground">Veja as denuncias mais recentes da comunidade</p>
+              <p className="text-muted-foreground">Veja as denúncias mais recentes da comunidade</p>
             </div>
             <Link href="/denuncias">
               <Button variant="outline" className="gap-2">
@@ -289,7 +289,7 @@ export default function HomePage() {
           ) : (
             <Card className="border-dashed border-border/60">
               <CardContent className="flex min-h-40 items-center justify-center text-center text-muted-foreground">
-                {isLoading ? 'Carregando denuncias...' : 'Nenhuma denuncia publicada ainda. A primeira vai aparecer aqui.'}
+                {isLoading ? 'Carregando denúncias...' : 'Nenhuma denúncia publicada ainda. A primeira vai aparecer aqui.'}
               </CardContent>
             </Card>
           )}
@@ -307,7 +307,7 @@ export default function HomePage() {
           >
             <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-4">Como funciona</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Em tres passos simples, voce ajuda a transformar Aracaju
+              Em três passos simples, você ajuda a transformar Aracaju
             </p>
           </motion.div>
 
@@ -316,17 +316,17 @@ export default function HomePage() {
               {
                 icon: Lightbulb,
                 title: 'Registre',
-                description: 'Identifique um problema urbano e registre sua denuncia com fotos e localizacao.',
+                description: 'Identifique um problema urbano e registre sua denúncia com fotos e localização.',
               },
               {
                 icon: Vote,
                 title: 'Comunidade valida',
-                description: 'Outros cidadaos confirmam o problema, aumentando sua visibilidade e prioridade.',
+                description: 'Outros cidadãos confirmam o problema, aumentando sua visibilidade e prioridade.',
               },
               {
                 icon: BarChart3,
                 title: 'Prioridade aumenta',
-                description: 'Denuncias com mais confirmacoes ganham destaque e ajudam a orientar a resposta.',
+                description: 'Denúncias com mais confirmacoes ganham destaque e ajudam a orientar a resposta.',
               },
             ].map((step, index) => (
               <motion.div
@@ -365,7 +365,7 @@ export default function HomePage() {
             >
               <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-4">Bairros mais afetados</h2>
               <p className="text-muted-foreground mb-8">
-                Acompanhe quais regioes precisam de mais atencao e como esta o progresso de resolucao em cada bairro.
+                Acompanhe quais regiões precisam de mais atenção e como está o progresso de resolução em cada bairro.
               </p>
 
               {topNeighborhoods.length > 0 ? (
@@ -414,7 +414,7 @@ export default function HomePage() {
               ) : (
                 <Card className="border-dashed border-border/60">
                   <CardContent className="flex min-h-32 items-center justify-center text-center text-muted-foreground">
-                    Os bairros mais afetados serao listados conforme as denuncias forem chegando.
+                    Os bairros mais afetados serão listados conforme as denúncias forem chegando.
                   </CardContent>
                 </Card>
               )}
@@ -448,19 +448,19 @@ export default function HomePage() {
                     <div className="text-center p-6 rounded-xl bg-card">
                       <CheckCircle2 className="h-8 w-8 text-emerald-500 mx-auto mb-3" />
                       <p className="font-serif text-3xl font-bold text-emerald-500">{resolutionRate}%</p>
-                      <p className="text-sm text-muted-foreground">Taxa de resolucao</p>
+                      <p className="text-sm text-muted-foreground">Taxa de resolução</p>
                     </div>
                     <div className="text-center p-6 rounded-xl bg-card">
                       <Users className="h-8 w-8 text-secondary mx-auto mb-3" />
                       <p className="font-serif text-3xl font-bold text-secondary">
                         {new Set(complaints.map((complaint) => complaint.userId)).size}
                       </p>
-                      <p className="text-sm text-muted-foreground">Usuarios denunciando</p>
+                      <p className="text-sm text-muted-foreground">Usuários denunciando</p>
                     </div>
                     <div className="text-center p-6 rounded-xl bg-card">
                       <FileText className="h-8 w-8 text-amber-500 mx-auto mb-3" />
                       <p className="font-serif text-3xl font-bold text-amber-500">{stats.avgResolutionDays}</p>
-                      <p className="text-sm text-muted-foreground">Dias em media para resolver</p>
+                      <p className="text-sm text-muted-foreground">Dias em média para resolver</p>
                     </div>
                   </div>
                 </CardContent>
@@ -481,7 +481,7 @@ export default function HomePage() {
           >
             <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-4">Faca parte da mudanca</h2>
             <p className="text-muted-foreground mb-8">
-              Cada denuncia registrada ajuda a construir uma cidade melhor. Junte-se a quem ja esta
+              Cada denúncia registrada ajuda a construir uma cidade melhor. Junte-se a quem já está
               fazendo a diferenca.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">

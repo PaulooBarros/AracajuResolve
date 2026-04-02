@@ -46,6 +46,13 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const DEFAULT_PUBLIC_SITE_URL = 'https://aracajuresolve.vercel.app/'
+
+function getEmailRedirectUrl() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim() || DEFAULT_PUBLIC_SITE_URL
+  return siteUrl.endsWith('/') ? siteUrl : `${siteUrl}/`
+}
+
 async function loadProfile(session: Session | null) {
   if (!session || !isSupabaseConfigured()) {
     return null
@@ -205,6 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
       options: {
+        emailRedirectTo: getEmailRedirectUrl(),
         data: {
           name,
         },

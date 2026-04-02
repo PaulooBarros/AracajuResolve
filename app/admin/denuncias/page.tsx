@@ -125,13 +125,13 @@ export default function AdminComplaintsPage() {
       await updateComplaint(complaintId, { status })
       toast({
         title: 'Status atualizado',
-        description: `A denuncia foi marcada como ${STATUS_LABELS[status].toLowerCase()}.`,
+        description: `A denúncia foi marcada como ${STATUS_LABELS[status].toLowerCase()}.`,
       })
     } catch (error) {
       console.error(error)
       toast({
         title: 'Erro ao atualizar',
-        description: 'Nao foi possivel atualizar o status da denuncia.',
+        description: 'Não foi possível atualizar o status da denúncia.',
         variant: 'destructive',
       })
     } finally {

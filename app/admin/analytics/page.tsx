@@ -196,12 +196,12 @@ export default function AdminAnalyticsPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-2xl font-bold">Analytics</h1>
-          <p className="text-muted-foreground text-sm">Analise detalhada e indicadores de desempenho</p>
+          <p className="text-muted-foreground text-sm">Análise detalhada e indicadores de desempenho</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="gap-1">
             <Calendar className="h-3 w-3" />
-            Ultimos 30 dias
+            Últimos 30 dias
           </Badge>
         </div>
       </div>
@@ -256,7 +256,7 @@ export default function AdminAnalyticsPage() {
           <Card className="border-border/50">
             <CardHeader>
               <CardTitle className="font-serif text-base font-semibold">
-                Evolucao de denuncias x resolucoes
+                Evolução de denúncias x resoluções
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -317,7 +317,7 @@ export default function AdminAnalyticsPage() {
         >
           <Card className="border-border/50 h-full">
             <CardHeader>
-              <CardTitle className="font-serif text-base font-semibold">Distribuicao por status</CardTitle>
+              <CardTitle className="font-serif text-base font-semibold">Distribuição por status</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[200px]">
@@ -371,7 +371,7 @@ export default function AdminAnalyticsPage() {
         >
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-serif text-base font-semibold">Denuncias por categoria</CardTitle>
+              <CardTitle className="font-serif text-base font-semibold">Denúncias por categoria</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
@@ -456,21 +456,21 @@ export default function AdminAnalyticsPage() {
           <CardContent>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="text-center p-4 rounded-lg bg-muted/30">
-                <p className="text-xs text-muted-foreground mb-1">Eficiencia operacional</p>
+                <p className="text-xs text-muted-foreground mb-1">Eficiência operacional</p>
                 <p className="font-serif text-2xl font-bold text-primary">{analytics.resolutionRate}%</p>
                 <p className="text-xs text-emerald-500 flex items-center justify-center gap-1 mt-1">
-                  <TrendingUp className="h-3 w-3" /> taxa geral de resolucao
+                  <TrendingUp className="h-3 w-3" /> taxa geral de resolução
                 </p>
               </div>
               <div className="text-center p-4 rounded-lg bg-muted/30">
-                <p className="text-xs text-muted-foreground mb-1">Cidadaos participantes</p>
+                <p className="text-xs text-muted-foreground mb-1">Cidadãos participantes</p>
                 <p className="font-serif text-2xl font-bold text-emerald-500">{analytics.uniqueReporters}</p>
                 <p className="text-xs text-emerald-500 flex items-center justify-center gap-1 mt-1">
                   <TrendingUp className="h-3 w-3" /> autores distintos
                 </p>
               </div>
               <div className="text-center p-4 rounded-lg bg-muted/30">
-                <p className="text-xs text-muted-foreground mb-1">Novas denuncias do mes</p>
+                <p className="text-xs text-muted-foreground mb-1">Novas denúncias do mês</p>
                 <p className="font-serif text-2xl font-bold text-blue-500">{analytics.monthlyData.at(-1)?.complaints || 0}</p>
                 <p className="text-xs text-emerald-500 flex items-center justify-center gap-1 mt-1">
                   <TrendingDown className="h-3 w-3" /> volume recente

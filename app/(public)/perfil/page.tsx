@@ -131,7 +131,7 @@ export default function ProfilePage() {
 
       if (!success) {
         toast({
-          title: 'Nao foi possivel salvar',
+          title: 'Não foi possível salvar',
           description: authError || 'Tente novamente em instantes.',
           variant: 'destructive',
         })
@@ -147,7 +147,7 @@ export default function ProfilePage() {
       console.error(error)
       toast({
         title: 'Erro ao atualizar perfil',
-        description: 'Nao foi possivel salvar suas alteracoes.',
+        description: 'Não foi possível salvar suas alterações.',
         variant: 'destructive',
       })
     } finally {
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                   </Badge>
                 </div>
                 <p className="mt-2 text-muted-foreground">
-                  Gerencie seus dados e acompanhe seu historico de participacao na plataforma.
+                  Gerencie seus dados e acompanhe seu histórico de participação na plataforma.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3 text-sm text-muted-foreground">
                   <span className="inline-flex items-center gap-2">
@@ -251,13 +251,13 @@ export default function ProfilePage() {
               <Link href="/nova-denuncia">
                 <Button className="gap-2 bg-primary hover:bg-primary/90">
                   <PlusCircle className="h-4 w-4" />
-                  Nova Denuncia
+                  Nova Denúncia
                 </Button>
               </Link>
               <Link href="/minhas-denuncias">
                 <Button variant="outline" className="gap-2">
                   <FileText className="h-4 w-4" />
-                  Minhas Denuncias
+                  Minhas Denúncias
                 </Button>
               </Link>
             </div>
@@ -301,7 +301,7 @@ export default function ProfilePage() {
               <div>
                 <CardTitle className="font-serif text-xl">Dados da conta</CardTitle>
                 <p className="text-sm text-muted-foreground">
-                  Atualize as informacoes principais exibidas no seu perfil.
+                  Atualize as informações principais exibidas no seu perfil.
                 </p>
               </div>
               {!isEditing && (
@@ -376,7 +376,7 @@ export default function ProfilePage() {
 
           <Card className="border-border/50">
             <CardHeader className="pb-4">
-              <CardTitle className="font-serif text-xl">Resumo rapido</CardTitle>
+              <CardTitle className="font-serif text-xl">Resumo rápido</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {([
@@ -396,7 +396,7 @@ export default function ProfilePage() {
               ))}
 
               <div className="rounded-xl border border-dashed border-border/60 p-4 text-sm text-muted-foreground">
-                Seu perfil ajuda a acompanhar suas demandas e dar contexto ao poder publico sobre a recorrencia dos problemas relatados.
+                Seu perfil ajuda a acompanhar suas demandas e dar contexto ao poder público sobre a recorrência dos problemas relatados.
               </div>
             </CardContent>
           </Card>
@@ -407,13 +407,13 @@ export default function ProfilePage() {
             <div>
               <h2 className="font-serif text-2xl font-bold">Atividade recente</h2>
               <p className="text-sm text-muted-foreground">
-                As ultimas denuncias registradas na sua conta.
+                As últimas denúncias registradas na sua conta.
               </p>
             </div>
             {summary.total > 0 && (
               <Link href="/minhas-denuncias">
                 <Button variant="ghost" size="sm">
-                  Ver historico completo
+                  Ver histórico completo
                 </Button>
               </Link>
             )}
@@ -431,14 +431,14 @@ export default function ProfilePage() {
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
                   <FileText className="h-6 w-6 text-primary" />
                 </div>
-                <h3 className="font-serif text-xl font-semibold">Nenhuma denuncia enviada ainda</h3>
+                <h3 className="font-serif text-xl font-semibold">Nenhuma denúncia enviada ainda</h3>
                 <p className="mt-2 text-muted-foreground">
-                  Quando voce registrar sua primeira denuncia, ela vai aparecer aqui com status e acompanhamento.
+                  Quando você registrar sua primeira denúncia, ela vai aparecer aqui com status e acompanhamento.
                 </p>
                 <Link href="/nova-denuncia" className="inline-flex mt-6">
                   <Button className="gap-2 bg-primary hover:bg-primary/90">
                     <PlusCircle className="h-4 w-4" />
-                    Criar primeira denuncia
+                    Criar primeira denúncia
                   </Button>
                 </Link>
               </CardContent>

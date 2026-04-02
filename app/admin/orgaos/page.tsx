@@ -110,9 +110,9 @@ export default function AdminOrgaosPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-serif text-2xl font-bold">Orgaos responsaveis</h1>
+          <h1 className="font-serif text-2xl font-bold">Órgãos responsáveis</h1>
           <p className="text-muted-foreground text-sm">
-            Visao consolidada dos orgaos e secretarias ligados as denuncias reais
+            Visão consolidada dos órgãos e secretarias ligados às denúncias reais
           </p>
         </div>
         <Button className="bg-primary hover:bg-primary/90 gap-2">
@@ -131,7 +131,7 @@ export default function AdminOrgaosPage() {
                 </div>
                 <div>
                   <p className="font-serif text-3xl font-bold">{organs.length}</p>
-                  <p className="text-sm text-muted-foreground">Orgaos identificados</p>
+                  <p className="text-sm text-muted-foreground">Órgãos identificados</p>
                 </div>
               </div>
             </CardContent>
@@ -154,7 +154,7 @@ export default function AdminOrgaosPage() {
                   <p className="font-serif text-3xl font-bold">
                     {totalComplaints > 0 ? Math.round((totalResolved / totalComplaints) * 100) : 0}%
                   </p>
-                  <p className="text-sm text-muted-foreground">Taxa de resolucao</p>
+                  <p className="text-sm text-muted-foreground">Taxa de resolução</p>
                 </div>
               </div>
             </CardContent>
@@ -175,7 +175,7 @@ export default function AdminOrgaosPage() {
                 </div>
                 <div>
                   <p className="font-serif text-3xl font-bold">{avgResolution} dias</p>
-                  <p className="text-sm text-muted-foreground">Tempo medio de resolucao</p>
+                  <p className="text-sm text-muted-foreground">Tempo médio de resolução</p>
                 </div>
               </div>
             </CardContent>
@@ -191,15 +191,15 @@ export default function AdminOrgaosPage() {
       >
         <Card className="border-border/50">
           <CardHeader>
-            <CardTitle className="font-serif text-base font-semibold">Lista de orgaos</CardTitle>
+            <CardTitle className="font-serif text-base font-semibold">Lista de órgãos</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs">Orgao</TableHead>
+                  <TableHead className="text-xs">Órgão</TableHead>
                   <TableHead className="text-xs">Categorias</TableHead>
-                  <TableHead className="text-xs">Denuncias</TableHead>
+                  <TableHead className="text-xs">Denúncias</TableHead>
                   <TableHead className="text-xs">Resolvidas</TableHead>
                   <TableHead className="text-xs">Taxa</TableHead>
                   <TableHead className="text-xs">Tempo medio</TableHead>
@@ -264,7 +264,7 @@ export default function AdminOrgaosPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem className="gap-2">
                               <FileText className="h-4 w-4" />
-                              Ver denuncias
+                              Ver denúncias
                             </DropdownMenuItem>
                             <DropdownMenuItem className="gap-2">
                               <Edit className="h-4 w-4" />
@@ -296,7 +296,7 @@ export default function AdminOrgaosPage() {
         >
           <Card className="border-border/50">
             <CardHeader>
-              <CardTitle className="font-serif text-base font-semibold">Ranking por eficiencia</CardTitle>
+              <CardTitle className="font-serif text-base font-semibold">Ranking por eficiência</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -370,11 +370,11 @@ export default function AdminOrgaosPage() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{organ.name}</p>
-                        <p className="text-xs text-muted-foreground">{organ.complaintsCount} denuncias</p>
+                        <p className="text-xs text-muted-foreground">{organ.complaintsCount} denúncias</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-emerald-600">{organ.avgResolutionDays} dias</p>
-                        <p className="text-xs text-muted-foreground">tempo medio</p>
+                        <p className="text-xs text-muted-foreground">tempo médio</p>
                       </div>
                     </div>
                   ))}

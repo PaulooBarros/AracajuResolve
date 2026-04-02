@@ -479,7 +479,7 @@ export default function HomePage() {
             transition={{ duration: 0.5 }}
             className="text-center max-w-2xl mx-auto"
           >
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-4">Faca parte da mudanca</h2>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold mb-4">Faça parte da mudança</h2>
             <p className="text-muted-foreground mb-8">
               Cada denúncia registrada ajuda a construir uma cidade melhor. Junte-se a quem já está
               fazendo a diferenca.
